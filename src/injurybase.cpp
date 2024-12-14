@@ -86,7 +86,7 @@ float Injuries::DeathInjury::GetMaxHealthAv(RE::Actor* a_actor)
 
 void Injuries::DeathInjury::ApplyStressToDeath()
 {
-	if (can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled) {
+	if (can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled->value != 0) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
 		logs::info("stress before death = {}", Settings::stress_total_value->value);
 		stress->ApplyStressOnce();
@@ -97,7 +97,7 @@ void Injuries::DeathInjury::ApplyStressToDeath()
 
 void Injuries::DeathInjury::HealStressFromDeath()
 {
-	if (!can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled) {
+	if (!can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled->value != 0) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
 		logs::info("stress before healing = {}", Settings::stress_total_value->value);
 		stress->ReduceStress();
