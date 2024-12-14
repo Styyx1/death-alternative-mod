@@ -25,10 +25,10 @@ class ResurrectionManager : public ResurrectionAPI
     {        
         if (RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton(); a == player) {
             auto* injury = Injuries::DeathInjury::GetSingleton();
-            injury->RestoreActorValue(a, RE::ActorValue::kStamina, 20.0f);
+            injury->RestoreAV(a, RE::ActorValue::kStamina, 20.0f);
             DeathEffects::Ethereal::SetEthereal(a);
             Utility::Spells::ApplySpell(a, a, Settings::injury_spell);
-            DeathEffects::Ethereal::RemoveGoldPlayer(player, 10.0f);
+            DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
             std::jthread([=] {
                 std::this_thread::sleep_for(2s);
                 SKSE::GetTaskInterface()->AddTask([=] {

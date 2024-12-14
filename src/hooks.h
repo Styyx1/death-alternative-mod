@@ -4,7 +4,7 @@
 namespace Hooks
 {
 	void InstallHooks();
-	// https://github.com/muenchk/NPCsUsePotions/blob/3256f95831a84acccccf53802364e1edb9953e80/include/Hooks.h#L7
+	//Credits: https://github.com/muenchk/NPCsUsePotions/blob/3256f95831a84acccccf53802364e1edb9953e80/include/Hooks.h#L7
 	struct PlayerPotionUsed {
 
 		static void Install();

@@ -3,7 +3,7 @@
 #include "settings.h"
 #include "utility.h"
 
-// most of it is derived from: https://github.com/colinswrath/BladeAndBlunt/blob/main/include/InjuryPenaltyManager.h
+// Credits: https://github.com/colinswrath/BladeAndBlunt/blob/main/include/InjuryPenaltyManager.h
 namespace Injuries
 {
 	class DeathInjury

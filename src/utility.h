@@ -6,7 +6,7 @@ namespace Utility
 {
     struct Actors
     {
-        // https://github.com/powerof3/PapyrusExtenderSSE/
+        //Credits: https://github.com/powerof3/PapyrusExtenderSSE/
         inline static std::vector<RE::Actor*> GetNearbyActors(RE::TESObjectREFR* a_ref, float a_radius, bool a_ignorePlayer)
         {
             {
@@ -46,7 +46,7 @@ namespace Utility
         } 
     };
 
-    //https://github.com/colinswrath/BladeAndBlunt/blob/main/include/Conditions.h
+    //Credits: https://github.com/colinswrath/BladeAndBlunt/blob/main/include/Conditions.h
 	struct Spells
 	{
         

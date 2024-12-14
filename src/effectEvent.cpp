@@ -15,7 +15,6 @@ RE::BSEventNotifyControl Effect::ApplyEffectEvent::ProcessEvent(const RE::TESMag
 	if (!effect->HasKeywordString("CureInjury")) {
 		return RE::BSEventNotifyControl::kContinue;
 	}
-	logs::info("Cure Injury effect detected");
 	auto inj = Injuries::DeathInjury::GetSingleton();
 	inj->RemoveAttributePenalty(player);
 	inj->RemoveAllExistingInjurySpells(player);

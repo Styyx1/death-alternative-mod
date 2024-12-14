@@ -1,6 +1,6 @@
 #pragma once
 #include "injurybase.h"
-
+// Credits: https://github.com/colinswrath/BladeAndBlunt/blob/main/include/Serialization.h
 namespace Serialisation
 {
 	static constexpr std::uint32_t SerializationVersion = 1;

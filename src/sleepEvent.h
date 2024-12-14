@@ -1,6 +1,7 @@
 #pragma once
 #include "settings.h"
 
+//Credits: https://github.com/colinswrath/Survival-Mode-Improved-SKSE
 namespace SleepEvent
 {
     static inline float hours;

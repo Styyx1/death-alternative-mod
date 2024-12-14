@@ -2,9 +2,7 @@
 
 namespace Effect
 {
-
     void InstallEvents();
-
 
     class ApplyEffectEvent final : public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
     {
