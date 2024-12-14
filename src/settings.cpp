@@ -8,19 +8,14 @@ void Settings::LoadSettings()
 	ini.LoadFile(R"(.\Data\SKSE\Plugins\shades-of-mortality.ini)");
 	//General
 	enable_npcs = ini.GetBoolValue("General", "bEnableNPCS", true);
-	injury_decrease_tier_1 = (float)ini.GetDoubleValue("General", "fTierOneInjury", 10.0f);
-	injury_decrease_tier_2 = (float)ini.GetDoubleValue("General", "fTierTwoInjury", 20.0f);
-	injury_decrease_tier_3 = (float)ini.GetDoubleValue("General", "fTierThreeInjury", 40.0f);
+	remove_gold = ini.GetBoolValue("General", "bRemoveGold", true);
+	injury_decrease_modifier = (float)ini.GetDoubleValue("General", "fInjuryHealthDecreasModifier", 0.4f);
 	min_sleep_duration = (float)ini.GetDoubleValue("General", "fSleepDuration", 8.0f);
 	stress_increase_value = (float)ini.GetDoubleValue("General", "fStressIncreaseAmount", 10.0f);
+	gold_remove_percentage = (float)ini.GetDoubleValue("General", "fGoldRemovePercentage", 10.0f);
 	//Texts
 	stress_increase_text = ini.GetValue("Texts", "sStressIncreaseText", "I hope this ends well...");
 	stress_decrease_text = ini.GetValue("Texts", "sInjuryHealStressText", "I feel a bit more relaxed now!");
-
-	/*
-		inline static std::string stress_increase_text{ "I hope this ends well..." };
-	inline static std::string stress_decrease_text{ "I feel a bit more relaxed now!" };
-	*/
 
 	logs::info("...loaded settings");
 
@@ -35,6 +30,7 @@ void Settings::LoadForms()
 	const int inj_tier_3_form = 0x807;
 	const int inj_dummy_effect_form = 0x804;
 	const int cheat_death_token_form = 0x809;
+	const int ethereal_npc_form = 0x80c;
 	const char* mod_name = "shade-of-mortality.esp";
 
 	logs::info("loading forms...");
@@ -42,9 +38,9 @@ void Settings::LoadForms()
 	//mod forms:
 	ethereal_spell = dh->LookupForm(ethereal_spell_form, mod_name)->As<RE::SpellItem>();
 	death_heal = dh->LookupForm(heal_spell_form, mod_name)->As<RE::SpellItem>();
-	injury_spell_10 = dh->LookupForm(inj_tier_1_form, mod_name)->As<RE::SpellItem>();
-	injury_spell_20 = dh->LookupForm(inj_tier_2_form, mod_name)->As<RE::SpellItem>();
-	injury_spell_40 = dh->LookupForm(inj_tier_3_form, mod_name)->As<RE::SpellItem>();
+	injury_spell = dh->LookupForm(inj_tier_3_form, mod_name)->As<RE::SpellItem>();
+	ethereal_spell_npcs = dh->LookupForm(ethereal_npc_form, mod_name)->As<RE::SpellItem>();
+
 	cheat_death_token = dh->LookupForm(cheat_death_token_form, mod_name)->As<RE::TESObjectMISC>();
 
 	const char* stress_mod = "Stress and Fear.esp";
@@ -60,9 +56,9 @@ void Settings::LoadForms()
 		is_stress_mod_active = true;
 	}
 
-
 	// base game forms:
 	health_penalty_ui_global = dh->LookupForm(0x2EDE, "Update.esm")->As<RE::TESGlobal>();
+	logs::info("penalty ui is {} with a value of {}", health_penalty_ui_global->GetFormEditorID(), health_penalty_ui_global->value);
 	survival_mode_active = dh->LookupForm(0x826, "ccqdrsse001-survivalmode.esl")->As<RE::TESGlobal>();
 
 	logs::info("...loaded forms");

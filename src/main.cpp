@@ -4,6 +4,8 @@
 #include "deatheffects.h"
 #include "injurybase.h"
 #include "serialisation.h"
+#include "hooks.h"
+#include "effectEvent.h"
 
 class ResurrectionManager : public ResurrectionAPI
 {
@@ -15,22 +17,27 @@ class ResurrectionManager : public ResurrectionAPI
             return true;
         }
         else {
-            return false;
+            return DeathEffects::Ethereal::get_count(a, Settings::cheat_death_token) && Settings::enable_npcs;
         }        
     }
 
     void resurrect(RE::Actor* a) override
-    {
-        auto* injury = Injuries::DeathInjury::GetSingleton();
-        DeathEffects::Ethereal::SetEthereal(a);
+    {        
         if (RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton(); a == player) {
-            Utility::Spells::ApplySpell(a, a, Settings::injury_spell_40);
+            auto* injury = Injuries::DeathInjury::GetSingleton();
+            injury->RestoreActorValue(a, RE::ActorValue::kStamina, 20.0f);
+            DeathEffects::Ethereal::SetEthereal(a);
+            Utility::Spells::ApplySpell(a, a, Settings::injury_spell);
+            DeathEffects::Ethereal::RemoveGoldPlayer(player, 10.0f);
             std::jthread([=] {
                 std::this_thread::sleep_for(2s);
                 SKSE::GetTaskInterface()->AddTask([=] {
                     injury->CheckInjuryAvPenalty(a);
                     });
                 }).detach();
+        }
+        else {
+            DeathEffects::Ethereal::ProcessNPCDeath(a);
         }
     }
 };
@@ -46,9 +53,11 @@ void addSubscriber()
 
 void InitListener(SKSE::MessagingInterface::Message* a_msg) 
 {
-	if (a_msg->type == SKSE::MessagingInterface::kDataLoaded) {
+	if (a_msg->type == SKSE::MessagingInterface::kDataLoaded) {        
 		Settings::LoadSettings();
 		Settings::LoadForms();
+        Hooks::InstallHooks();
+        Effect::InstallEvents();
 		SleepEvent::InstallEvents();
 		addSubscriber();
 	}
@@ -64,7 +73,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 {
 	SKSE::Init(a_skse);
 	SKSE::GetMessagingInterface()->RegisterListener(InitListener);
-
+    SKSE::AllocTrampoline(14);
     if (auto serialization = SKSE::GetSerializationInterface()) {
         serialization->SetUniqueID(Serialisation::ID);
         serialization->SetSaveCallback(&Serialisation::SaveCallback);

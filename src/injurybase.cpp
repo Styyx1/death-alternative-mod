@@ -5,36 +5,12 @@ float Injuries::DeathInjury::GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue
 {
     return a_actor->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, a_av) + a_actor->AsActorValueOwner()->GetPermanentActorValue(a_av);
 }
-
-//float Injuries::DeathInjury::GetActorValuePercentage(RE::Actor* a_actor, RE::ActorValue a_av)
-//{
-//    using func_t = decltype(GetActorValuePercentage);
-//    REL::Relocation<func_t> func{ REL::RelocationID(36347, 37337) };
-//    return func(a_actor, a_av);
-//}
-
-void Injuries::DeathInjury::HealthInjury(RE::Actor* a_actor, float a_percentage)
-{
-	float maxPenAv = GetMaxActorValue(a_actor, RE::ActorValue::kHealth);
-	logs::info("max av is {}", maxPenAv);
-
-	float modifier = a_percentage;
-	logs::info("modifier is {}", a_percentage);
-	float newPenaltyMag = std::roundf(maxPenAv * a_percentage);
-	logs::info("new penalty mag is: {}", newPenaltyMag);
-
-	if (newPenaltyMag > maxPenAv) {
-		newPenaltyMag = maxPenAv;
-	}
-	a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, -newPenaltyMag);	//Damage or restore AV
-	return;
-}
-
+//main function to call, leads to the other necessary functions
 void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor* a_actor)
 {
-	if (a_actor->HasSpell(Settings::injury_spell_40)) {
+	if (a_actor->HasSpell(Settings::injury_spell)) {
 		logs::info("check if injury is active");
-		ApplyAttributePenalty(a_actor, Settings::injury_decrease_tier_3);
+		ApplyAttributePenalty(a_actor, Settings::injury_decrease_modifier);
 		return;
 	}
 	else {
@@ -51,7 +27,8 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 	}
 	float maxPenAv = GetMaxHealthAv(a_actor);
 	float lastPenaltyMag = currentInjuryPenalty;
-	float newPenaltyMag = std::roundf(maxPenAv * percentPen);
+	float modifier = percentPen / 100;
+	float newPenaltyMag = std::roundf(maxPenAv * modifier);
 
 
 	if (newPenaltyMag > maxPenAv) {
@@ -72,9 +49,9 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 	injury_active = true;
 	can_apply_stress = true;
 	ApplyStressToDeath();
-	SetAttributePenaltyUIGlobal(percentPen);
-
-
+	/*if (Utility::Checks::IsSurvivalEnabled) {
+		SetAttributePenaltyUIGlobal(percentPen);
+	}*/
 	return;
 }
 
@@ -85,16 +62,19 @@ void Injuries::DeathInjury::RemoveAttributePenalty(RE::Actor* a_actor)
 	HealStressFromDeath();
 	if (currentPenaltyMag > 0) {
 		currentInjuryPenalty = 0.0f;
-		SetAttributePenaltyUIGlobal(0.0f);
+		/*if (Utility::Checks::IsSurvivalEnabled) {
+			SetAttributePenaltyUIGlobal(0.0f);
+		}*/		
 		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, currentPenaltyMag);		
 	}
 	return;
 }
 
+//too complex for what it does, but it was something else at first, so i kept it. Can use this to expand with injury tiers if necessary again.
 void Injuries::DeathInjury::RemoveAllExistingInjurySpells(RE::Actor* a)
 {
-	if (a->HasSpell(Settings::injury_spell_40)) {
-		a->RemoveSpell(Settings::injury_spell_40);
+	if (a->HasSpell(Settings::injury_spell)) {
+		a->RemoveSpell(Settings::injury_spell);
 	}
 	return;
 }
@@ -106,7 +86,7 @@ float Injuries::DeathInjury::GetMaxHealthAv(RE::Actor* a_actor)
 
 void Injuries::DeathInjury::ApplyStressToDeath()
 {
-	if (can_apply_stress && Settings::is_stress_mod_active) {
+	if (can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
 		logs::info("stress before death = {}", Settings::stress_total_value->value);
 		stress->ApplyStressOnce();
@@ -117,7 +97,7 @@ void Injuries::DeathInjury::ApplyStressToDeath()
 
 void Injuries::DeathInjury::HealStressFromDeath()
 {
-	if (!can_apply_stress && Settings::is_stress_mod_active) {
+	if (!can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
 		logs::info("stress before healing = {}", Settings::stress_total_value->value);
 		stress->ReduceStress();

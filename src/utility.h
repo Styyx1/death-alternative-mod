@@ -6,6 +6,7 @@ namespace Utility
 {
     struct Actors
     {
+        // https://github.com/powerof3/PapyrusExtenderSSE/
         inline static std::vector<RE::Actor*> GetNearbyActors(RE::TESObjectREFR* a_ref, float a_radius, bool a_ignorePlayer)
         {
             {
@@ -45,26 +46,10 @@ namespace Utility
         } 
     };
 
+    //https://github.com/colinswrath/BladeAndBlunt/blob/main/include/Conditions.h
 	struct Spells
 	{
-        inline static void ApplyTieredSpell(RE::Actor* a_caster, RE::Actor* a_target)
-        {
-            if (a_target->HasSpell(Settings::injury_spell_10)) {
-                a_target->RemoveSpell(Settings::injury_spell_10);
-                ApplySpell(a_target, a_target, Settings::injury_spell_20);
-                return;
-            }
-            else if (a_target->HasSpell(Settings::injury_spell_20)) {
-                a_target->RemoveSpell(Settings::injury_spell_20);
-                ApplySpell(a_target, a_target, Settings::injury_spell_40);
-                return;
-            }
-            else if (!a_target->HasSpell(Settings::injury_spell_10) && !a_target->HasSpell(Settings::injury_spell_20) && !a_target->HasSpell(Settings::injury_spell_40)){
-                ApplySpell(a_target, a_target, Settings::injury_spell_10);
-                return;
-            }
-            return;
-        }
+        
 
         inline static bool ActorHasActiveMagicEffect(RE::Actor* a_actor, RE::EffectSetting* a_effect)
         {
@@ -81,7 +66,6 @@ namespace Utility
             }
             return false;
         }
-
 
         static bool IsPermanent(RE::MagicItem* item)
         {
@@ -107,4 +91,19 @@ namespace Utility
             }
         }
 	};
+
+    struct Checks
+    {
+        static bool IsSurvivalEnabled() {
+            if (!Settings::survival_mode_active) {
+                return false;
+            }
+            if (Settings::survival_mode_active->value == 1.0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    };
+
 }
