@@ -20,7 +20,7 @@ void DeathEffects::Ethereal::ProcessNPCDeath(RE::Actor* a_actor)
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::death_heal);
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::ethereal_spell_npcs);
 	a_actor->RemoveItem(Settings::cheat_death_token, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr, nullptr, nullptr);
-	logs::info("Removed {} from {}", Settings::cheat_death_token->GetName(), a_actor->GetDisplayFullName());
+	//logs::info("Removed {} from {}", Settings::cheat_death_token->GetName(), a_actor->GetDisplayFullName());
 	return;
 }
 
@@ -38,7 +38,7 @@ void DeathEffects::Ethereal::RemoveGoldPlayer(RE::PlayerCharacter* player, float
 	if (maximum_gold_to_remove > 0) {
 		uint32_t amount = std::clamp(gold_to_remove_percent, minimum_value, maximum_gold_to_remove);
 		player->RemoveItem(gold->As<RE::TESBoundObject>(), amount, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
-		logs::info("removed {} pieces of {}", amount, gold->As<RE::TESBoundObject>()->GetName());
+		//logs::info("removed {} pieces of {}", amount, gold->As<RE::TESBoundObject>()->GetName());
 	}
 	return;	
 }

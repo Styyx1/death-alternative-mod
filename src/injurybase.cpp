@@ -22,7 +22,7 @@ void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor* a_actor)
 void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float percentPen)
 {
 	if (injury_active) {
-		logs::info("injury is still active");
+		//logs::info("injury is still active");
 		return;
 	}
 	float maxPenAv = GetMaxHealthAv(a_actor);
@@ -35,9 +35,9 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 		newPenaltyMag = maxPenAv;
 	}
 	auto magDelta = lastPenaltyMag - newPenaltyMag;
-	logs::info("stats check. maxPenAV = {}, newPenaltyMag = {}, magDelta = {}", maxPenAv, newPenaltyMag, magDelta);
+	//logs::info("stats check. maxPenAV = {}, newPenaltyMag = {}, magDelta = {}", maxPenAv, newPenaltyMag, magDelta);
 	if (magDelta < 0) {
-		logs::info("restores some health");
+		//logs::info("restores some health");
 		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kHealth, -1 * magDelta);  //Damage or restore AV
 	}
 
@@ -45,7 +45,7 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 	currentInjuryPenalty = newPenaltyMag;
 
 	a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta);	//Damage or restore AV
-	logs::info("av check: current value is {} and current max is {}", a_actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth), GetMaxActorValue(a_actor, RE::ActorValue::kHealth));
+	//logs::info("av check: current value is {} and current max is {}", a_actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth), GetMaxActorValue(a_actor, RE::ActorValue::kHealth));
 	injury_active = true;
 	can_apply_stress = true;
 	ApplyStressToDeath();
@@ -88,9 +88,9 @@ void Injuries::DeathInjury::ApplyStressToDeath()
 {
 	if (can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled->value != 0) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
-		logs::info("stress before death = {}", Settings::stress_total_value->value);
+		//logs::info("stress before death = {}", Settings::stress_total_value->value);
 		stress->ApplyStressOnce();
-		logs::info("stress after death = {}", Settings::stress_total_value->value);
+		//logs::info("stress after death = {}", Settings::stress_total_value->value);
 		can_apply_stress = false;
 	}
 }
@@ -99,9 +99,9 @@ void Injuries::DeathInjury::HealStressFromDeath()
 {
 	if (!can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled->value != 0) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
-		logs::info("stress before healing = {}", Settings::stress_total_value->value);
+		//logs::info("stress before healing = {}", Settings::stress_total_value->value);
 		stress->ReduceStress();
-		logs::info("stress after healing = {}", Settings::stress_total_value->value);
+		//logs::info("stress after healing = {}", Settings::stress_total_value->value);
 		can_apply_stress = true;
 	}
 }
