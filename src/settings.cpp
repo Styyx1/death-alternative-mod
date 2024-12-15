@@ -57,7 +57,7 @@ void Settings::LoadForms()
 	}
 
 	// base game forms:
-	health_penalty_ui_global = dh->LookupForm(0x2EDE, "Update.esm")->As<RE::TESGlobal>();
+	health_penalty_ui_global = dh->LookupForm(0x2EDE, "Update.esm")->As<RE::TESGlobal>(); //not used for now until i figure out how that works
 	survival_mode_active = dh->LookupForm(0x826, "ccqdrsse001-survivalmode.esl")->As<RE::TESGlobal>();
 
 	logs::info("...loaded forms");

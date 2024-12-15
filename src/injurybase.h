@@ -24,14 +24,14 @@ namespace Injuries
 		bool injury_active;
 		bool can_apply_stress;
 
-		float GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue a_av);		
+		float GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue a_av);
+		float GetMaxHealthAv(RE::Actor* a_actor);
 
 		void CheckInjuryAvPenalty(RE::Actor* a_actor);
 		void ApplyAttributePenalty(RE::Actor* a_actor, float percentPen);
-
 		void RemoveAttributePenalty(RE::Actor* a_actor);
 		void RemoveAllExistingInjurySpells(RE::Actor* a);
-		float GetMaxHealthAv(RE::Actor* a_actor);
+		
 		void ApplyStressToDeath();
 		void HealStressFromDeath();
 		

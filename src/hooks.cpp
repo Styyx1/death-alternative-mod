@@ -1,6 +1,5 @@
 #include "hooks.h"
 
-
 void Hooks::InstallHooks()
 {
 	Hooks::PlayerPotionUsed::Install();
@@ -17,7 +16,6 @@ void Hooks::PlayerPotionUsed::Install()
 void Hooks::PlayerPotionUsed::PlayerUsePotion(uint64_t self, RE::AlchemyItem* alch, uint64_t extralist)
 {
 	if (alch->HasKeywordString("CureInjury")) {
-		logs::info("Cure Injury potion effect detected");
 		auto inj = Injuries::DeathInjury::GetSingleton();
 		RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
 		inj->RemoveAttributePenalty(player);
