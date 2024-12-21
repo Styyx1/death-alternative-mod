@@ -21,11 +21,15 @@ namespace Injuries
 		}
 
 		float currentInjuryPenalty;
+		float currentStamRatePen;
+		float currentMagRatePen;
 		bool injury_active;
 		bool can_apply_stress;
 
 		float GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue a_av);
 		float GetMaxHealthAv(RE::Actor* a_actor);
+		float GetMaxStaminaRate(RE::Actor* a_actor);
+		float GetMaxMagickaRate(RE::Actor* a_actor);
 
 		void CheckInjuryAvPenalty(RE::Actor* a_actor);
 		void ApplyAttributePenalty(RE::Actor* a_actor, float percentPen);
@@ -35,6 +39,7 @@ namespace Injuries
 		void ApplyStressToDeath();
 		void HealStressFromDeath();
 		
+
 		//does not work for health, has its use for Stamina and Magicka
 		inline static void RestoreAV(RE::Actor* a_actor, RE::ActorValue a_av, float a_value)
 		{

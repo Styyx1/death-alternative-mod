@@ -70,7 +70,7 @@ namespace SleepEvent
             RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
             injuryBase->RemoveAllExistingInjurySpells(player);
             injuryBase->RemoveAttributePenalty(player);
-            logs::info("player slept for more than {} hours", Settings::min_sleep_duration);
+            logs::debug("player slept for more than {} hours", Settings::min_sleep_duration);
         }
     }
 }

@@ -25,27 +25,53 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 		//logs::info("injury is still active");
 		return;
 	}
+
+	logs::info("AVs before injury are: Health: {}, StaminaRate: {}, MagickaRate: {}", a_actor->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth), a_actor->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kStaminaRate), a_actor->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kMagickaRate));
+
+	//Health:
 	float maxPenAv = GetMaxHealthAv(a_actor);
 	float lastPenaltyMag = currentInjuryPenalty;
 	float modifier = percentPen / 100;
 	float newPenaltyMag = std::roundf(maxPenAv * modifier);
-
-
 	if (newPenaltyMag > maxPenAv) {
 		newPenaltyMag = maxPenAv;
 	}
 	auto magDelta = lastPenaltyMag - newPenaltyMag;
-	//logs::info("stats check. maxPenAV = {}, newPenaltyMag = {}, magDelta = {}", maxPenAv, newPenaltyMag, magDelta);
 	if (magDelta < 0) {
-		//logs::info("restores some health");
 		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kHealth, -1 * magDelta);  //Damage or restore AV
-	}
-
-	//Set tracker av not actual damage
-	currentInjuryPenalty = newPenaltyMag;
+	}	
+	currentInjuryPenalty = newPenaltyMag; //Set tracker av not actual damage
 
 	a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta);	//Damage or restore AV
-	//logs::info("av check: current value is {} and current max is {}", a_actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth), GetMaxActorValue(a_actor, RE::ActorValue::kHealth));
+
+	//Stamina rate:
+	float maxStamPenAv = GetMaxStaminaRate(a_actor);
+	float lastPenaltyStamRate = currentStamRatePen;
+	float stamRModi = percentPen / 100;
+	float newStamRateMag = std::roundf(maxStamPenAv * stamRModi);
+	if (newStamRateMag > maxStamPenAv) {
+		newStamRateMag = maxStamPenAv;
+	}
+	auto stamRateMagDelta = lastPenaltyStamRate - newStamRateMag;
+	if (stamRateMagDelta < 0) {
+		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStaminaRate, -1 * stamRateMagDelta);  //Damage or restore AV
+	}
+
+	currentStamRatePen = newStamRateMag;
+
+	a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kStaminaRate, stamRateMagDelta);
+	//Magicka rate:
+	float maxmagickPenAv = GetMaxMagickaRate(a_actor);
+	float lastPenaltymagickRate = currentMagRatePen;
+	float magickRModi = percentPen / 100;
+	float newmagickRateMag = std::roundf(maxmagickPenAv * magickRModi);
+	if (newmagickRateMag > maxmagickPenAv) {
+		newmagickRateMag = maxmagickPenAv;
+	}
+	auto magickRateMagDelta = lastPenaltymagickRate - newmagickRateMag;
+	currentMagRatePen = newmagickRateMag;
+
+	a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
 	injury_active = true;
 	can_apply_stress = true;
 	ApplyStressToDeath();
@@ -84,13 +110,21 @@ float Injuries::DeathInjury::GetMaxHealthAv(RE::Actor* a_actor)
 	return GetMaxActorValue(a_actor, RE::ActorValue::kHealth) + currentInjuryPenalty;
 }
 
+float Injuries::DeathInjury::GetMaxStaminaRate(RE::Actor* a_actor)
+{
+	return GetMaxActorValue(a_actor, RE::ActorValue::kStaminaRate) + currentStamRatePen;
+}
+
+float Injuries::DeathInjury::GetMaxMagickaRate(RE::Actor* a_actor)
+{
+	return GetMaxActorValue(a_actor, RE::ActorValue::kMagickaRate) + currentMagRatePen;
+}
+
 void Injuries::DeathInjury::ApplyStressToDeath()
 {
 	if (can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled->value != 0) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
-		//logs::info("stress before death = {}", Settings::stress_total_value->value);
 		stress->ApplyStressOnce();
-		//logs::info("stress after death = {}", Settings::stress_total_value->value);
 		can_apply_stress = false;
 	}
 }
@@ -99,9 +133,7 @@ void Injuries::DeathInjury::HealStressFromDeath()
 {
 	if (!can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled->value != 0) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
-		//logs::info("stress before healing = {}", Settings::stress_total_value->value);
 		stress->ReduceStress();
-		//logs::info("stress after healing = {}", Settings::stress_total_value->value);
 		can_apply_stress = true;
 	}
 }

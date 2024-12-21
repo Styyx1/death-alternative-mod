@@ -17,6 +17,8 @@ namespace Serialisation
 		} else {
 			auto injManager = Injuries::DeathInjury::GetSingleton();
 			auto penToSerialize = injManager->currentInjuryPenalty;
+			auto stamToSerialize = injManager->currentStamRatePen;
+			auto magToSerialize = injManager->currentMagRatePen;
 			auto boolToSave = injManager->injury_active;
 			auto stressBoolToSave = injManager->can_apply_stress;
 
@@ -24,6 +26,17 @@ namespace Serialisation
 				logs::error("Failed to write size of record data");
 				return;
 			}
+
+			if (!a_skse->WriteRecordData(stamToSerialize)) {
+				logs::error("Failed to write size of record data");
+				return;
+			}
+
+			if (!a_skse->WriteRecordData(magToSerialize)) {
+				logs::error("Failed to write size of record data");
+				return;
+			}
+
 			if (!a_skse->WriteRecordData(boolToSave)) {
 				logs::error("Failed to write size of record data");
 				return;
@@ -33,9 +46,11 @@ namespace Serialisation
 				return;
 			}
 			else { 
-				logs::info("Serialized: {}", std::to_string(penToSerialize));
-				logs::info("Serialized: {}", boolToSave ? "true" : "false");
-				logs::info("Serialized: {}", stressBoolToSave ? "true" : "false");
+				logs::info("Serialized Health Penalty: {}", penToSerialize);
+				logs::info("Serialized Stamina Rate Penalty: {}", stamToSerialize);
+				logs::info("Serialized Magicka Rate Penalty: {}", magToSerialize);
+				logs::info("Serialized Injury Active: {}", boolToSave ? "true" : "false");
+				logs::info("Serialized Can Apply Stress: {}", stressBoolToSave ? "true" : "false");
 			}
 		}
 	}
@@ -59,12 +74,25 @@ namespace Serialisation
 		}
 
 		float deserializedVal;
+		float deserializedStamR;
+		float deserializedMagR;
 		bool deserializedBool;
 		bool deserializedStressBool;
 		if (!a_skse->ReadRecordData(deserializedVal)) {
 			logs::error("Failed to load size");
 			return;
 		} 
+
+		if (!a_skse->ReadRecordData(deserializedStamR)) {
+			logs::error("Failed to load size");
+			return;
+		} 
+
+		if (!a_skse->ReadRecordData(deserializedMagR)) {
+			logs::error("Failed to load size");
+			return;
+		} 
+
 		if (!a_skse->ReadRecordData(deserializedBool)) {
 			logs::error("Failed to load size");
 			return;
@@ -75,11 +103,16 @@ namespace Serialisation
 		}
 		else {
 			injManager->currentInjuryPenalty = deserializedVal;
+			injManager->currentStamRatePen = deserializedStamR;
+			injManager->currentMagRatePen = deserializedMagR;
 			injManager->injury_active = deserializedBool;
 			injManager->can_apply_stress = deserializedStressBool;
-			logs::info("Deserialized: {}", std::to_string(deserializedVal));
-			logs::info("Deserialized: {}", deserializedBool ? "true" : "false");
-			logs::info("Deserialized: {}", deserializedStressBool ? "true" : "false");
+
+			logs::info("Deserialized Health Penalty: {}", deserializedVal);
+			logs::info("Deserialized Stamina Rate Penalty: {}", deserializedStamR);
+			logs::info("Deserialized Magicka Rate Penalty: {}", deserializedMagR);
+			logs::info("Deserialized Injury Active: {}", deserializedBool ? "true" : "false");
+			logs::info("Deserialized Can Apply Stress: {}", deserializedStressBool ? "true" : "false");
 		}
 	}
 
@@ -87,6 +120,8 @@ namespace Serialisation
 	{
 		auto injManager = Injuries::DeathInjury::GetSingleton();
 		injManager->currentInjuryPenalty = 0.0f;
+		injManager->currentInjuryPenalty = 0.0f;
+		injManager->currentStamRatePen = 0.0f;
 		injManager->injury_active = false;
 		injManager->injury_active = false;
 	}
