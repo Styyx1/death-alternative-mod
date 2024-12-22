@@ -28,7 +28,9 @@ class ResurrectionManager : public ResurrectionAPI
             injury->RestoreAV(a, RE::ActorValue::kStamina, 20.0f);
             DeathEffects::Ethereal::SetEthereal(a);
             Utility::Spells::ApplySpell(a, a, Settings::injury_spell);
-            DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
+            if (Settings::remove_gold) {
+                DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
+            }            
             std::jthread([=] {
                 std::this_thread::sleep_for(2s);
                 SKSE::GetTaskInterface()->AddTask([=] {
