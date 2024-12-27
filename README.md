@@ -8,8 +8,8 @@ This is a basic plugin template using CommonLibSSE-NG.
 
 ## Getting Started
 ```bat
-git clone --recurse-submodules https://github.com/qudix/commonlibsse-ng-template
-cd commonlibsse-ng-template
+git clone https://github.com/Styyx1/death-alternative-mod --recursive
+cd death-alternative-mod
 ```
 
 ### Build
@@ -42,5 +42,3 @@ xmake repo --update
 xmake require --upgrade
 ```
 
-## Documentation
-Please refer to the [Wiki](../../wiki/Home) for more advanced topics.
