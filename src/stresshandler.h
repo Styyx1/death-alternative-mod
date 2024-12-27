@@ -25,5 +25,6 @@ namespace StressHandler
 		void ReduceStress();
 		void ShowStressMessage(std::string a_text);
 		void CapStress(bool a_upper);
+		static void IncreaseStressWithoutInjury(float a_amount);
 	};
 }

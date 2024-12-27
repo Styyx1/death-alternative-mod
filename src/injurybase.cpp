@@ -9,7 +9,6 @@ float Injuries::DeathInjury::GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue
 void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor* a_actor)
 {
 	if (a_actor->HasSpell(Settings::injury_spell)) {
-		logs::info("check if injury is active");
 		ApplyAttributePenalty(a_actor, Settings::injury_decrease_modifier);
 		return;
 	}
@@ -22,11 +21,8 @@ void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor* a_actor)
 void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float percentPen)
 {
 	if (injury_active) {
-		//logs::info("injury is still active");
 		return;
 	}
-
-	logs::info("AVs before injury are: Health: {}, StaminaRate: {}, MagickaRate: {}", a_actor->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth), a_actor->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kStaminaRate), a_actor->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kMagickaRate));
 
 	//Health:
 	float maxPenAv = GetMaxHealthAv(a_actor);

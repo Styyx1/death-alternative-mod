@@ -10,6 +10,9 @@ void DeathEffects::Ethereal::SetEthereal(RE::Actor* a_actor)
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::ethereal_spell);
 	
 	for (auto& actor : Utility::Actors::GetNearbyActors(a_actor, 500.0f, false)) {
+		if (Settings::heal_enemies_on_death) {
+			Utility::Spells::ApplySpell(actor, actor, Settings::death_heal);
+		}
 		actor->StopCombat();
 		//actor->NotifyAnimationGraph("staggerStart");
 	}
@@ -38,6 +41,9 @@ void DeathEffects::Ethereal::RemoveGoldPlayer(RE::PlayerCharacter* player, float
 	if (maximum_gold_to_remove > 0) {
 		uint32_t amount = std::clamp(gold_to_remove_percent, minimum_value, maximum_gold_to_remove);
 		player->RemoveItem(gold->As<RE::TESBoundObject>(), amount, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+		if (Settings::show_gold_removal_message) {
+			RE::DebugNotification(std::format("{} {} removed", amount, gold->GetName()).c_str());
+		}
 		//logs::info("removed {} pieces of {}", amount, gold->As<RE::TESBoundObject>()->GetName());
 	}
 	return;	

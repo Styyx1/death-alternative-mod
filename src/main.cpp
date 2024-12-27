@@ -6,15 +6,32 @@
 #include "serialisation.h"
 #include "hooks.h"
 #include "effectEvent.h"
+#include "stresshandler.h"
 
+#undef GetObject
+
+bool resurrect_only_with_gold(RE::PlayerCharacter* player) {
+    RE::TESForm* const gold = RE::BGSDefaultObjectManager::GetSingleton()->GetObject(RE::DEFAULT_OBJECT::kGold);
+    if (Settings::kill_without_gold) {
+        if (player->GetItemCount(gold->As<RE::TESBoundObject>()) > 0) {
+            return true;
+        }			
+        else {
+            return false; 
+        }			
+    }
+    return true;
+}
 class ResurrectionManager : public ResurrectionAPI
 {
+    
+
     bool should_resurrect(RE::Actor* a) const override
     {
         RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
 
-        if (a == player) {            
-            return true;
+        if (a == player) {      
+            return resurrect_only_with_gold(player);
         }
         else {
             return DeathEffects::Ethereal::get_count(a, Settings::cheat_death_token) && Settings::enable_npcs;
@@ -28,6 +45,7 @@ class ResurrectionManager : public ResurrectionAPI
             injury->RestoreAV(a, RE::ActorValue::kStamina, 20.0f);
             DeathEffects::Ethereal::SetEthereal(a);
             Utility::Spells::ApplySpell(a, a, Settings::injury_spell);
+            StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);
             if (Settings::remove_gold) {
                 DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
             }            

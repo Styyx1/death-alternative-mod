@@ -9,6 +9,9 @@ void Settings::LoadSettings()
 	//General
 	enable_npcs = ini.GetBoolValue("General", "bEnableNPCS", true);
 	remove_gold = ini.GetBoolValue("General", "bRemoveGold", true);
+	show_gold_removal_message = ini.GetBoolValue("General", "bShowGoldRemoveMessage", false);
+	heal_enemies_on_death = ini.GetBoolValue("General", "bHealEnemies", false);
+	kill_without_gold = ini.GetBoolValue("General", "bKillWithoutGold", false);
 	injury_decrease_modifier = (float)ini.GetDoubleValue("General", "fInjuryHealthDecreasModifier", 0.4f);
 	min_sleep_duration = (float)ini.GetDoubleValue("General", "fSleepDuration", 8.0f);
 	stress_increase_value = (float)ini.GetDoubleValue("General", "fStressIncreaseAmount", 10.0f);
@@ -16,6 +19,12 @@ void Settings::LoadSettings()
 	//Texts
 	stress_increase_text = ini.GetValue("Texts", "sStressIncreaseText", "I hope this ends well...");
 	stress_decrease_text = ini.GetValue("Texts", "sInjuryHealStressText", "I feel a bit more relaxed now!");
+
+	LogBool("enable npcs", enable_npcs);
+	LogBool("remove gold", remove_gold);
+	LogBool("show_gold_removal_message", show_gold_removal_message);
+	LogBool("heal_enemies_on_death", heal_enemies_on_death);
+	LogBool("kill_without_gold", kill_without_gold);
 
 	logs::info("...loaded settings");
 
@@ -56,9 +65,15 @@ void Settings::LoadForms()
 		is_stress_mod_active = true;
 	}
 
-	// base game forms:
-	health_penalty_ui_global = dh->LookupForm(0x2EDE, "Update.esm")->As<RE::TESGlobal>(); //not used for now until i figure out how that works
-	survival_mode_active = dh->LookupForm(0x826, "ccqdrsse001-survivalmode.esl")->As<RE::TESGlobal>();
+	// base game forms needed for UI change that currently doesn't work anyway:
+	//health_penalty_ui_global = dh->LookupForm(0x2EDE, "Update.esm")->As<RE::TESGlobal>(); //not used for now until i figure out how that works
+	//survival_mode_active = dh->LookupForm(0x826, "ccqdrsse001-survivalmode.esl")->As<RE::TESGlobal>();
 
 	logs::info("...loaded forms");
+}
+
+void Settings::LogBool(std::string bool_name, bool a_setting)
+{
+	logs::info("{} is {}", bool_name, a_setting ? "true" : "false");
+	return;
 }

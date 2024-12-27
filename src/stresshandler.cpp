@@ -51,3 +51,18 @@ void StressHandler::StressApplication::CapStress(bool a_upper)
 		}
 	}
 }
+
+void StressHandler::StressApplication::IncreaseStressWithoutInjury(float a_amount)
+{
+	if (Settings::stress_enabled) {
+		Settings::stress_total_value->value += a_amount;
+		if (Settings::stress_total_value->value > 100) {
+			Settings::stress_total_value->value = 100.0f;
+		}
+
+		if (Settings::stress_total_value->value < 1.0) {
+			Settings::stress_total_value->value = 0.0f;
+		}		
+	}
+	return;
+}

@@ -92,18 +92,4 @@ namespace Utility
         }
 	};
 
-    struct Checks
-    {
-        static bool IsSurvivalEnabled() {
-            if (!Settings::survival_mode_active) {
-                return false;
-            }
-            if (Settings::survival_mode_active->value == 1.0) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    };
-
 }

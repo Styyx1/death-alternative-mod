@@ -8,6 +8,7 @@ namespace DeathEffects
 		static void SetEthereal(RE::Actor* a_actor);
 		static void ProcessNPCDeath(RE::Actor* a_actor);
 		static void RemoveGoldPlayer(RE::PlayerCharacter* player, float a_percentage);
+		static bool OnlyReviveWithGold();
 
 		// Credits: https://github.com/fenix31415/UselessFenixUtils
 		static uint32_t get_count_(RE::InventoryChanges* changes, RE::TESBoundObject* item)
