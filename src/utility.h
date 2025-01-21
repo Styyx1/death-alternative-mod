@@ -91,5 +91,52 @@ namespace Utility
             }
         }
 	};
+    struct Locations
+    {
+        inline static const std::vector<std::string> safe_areas_diff2
+        {
+            "LocTypeGuild",
+            "LocTypeInn",
+            "LocTypePlayerHouse"        
+        };
+
+        inline static const std::vector<std::string> unsafe_areas_diff1
+        {
+            "LocTypeAnimalDen",
+            "LocTypeBanditCamp",
+            "LocTypeDraugrCrypt",
+            "LocTypeDungeon",
+            "LocTypeDwarvenAutomatons",
+            "LocTypeFalmerHive",
+            "LocTypeForswornCamp",
+            "LocTypeGiantCamp",
+            "LocTypeShipwreck",
+            "LocTypeShip",
+            "LocTypeSprigganGrove",
+            "LocTypeVampireLair",
+            "LocTypeWarlockLair",
+            "LocTypeWerewolfLair"
+        };
+
+        inline static bool IsSafePlace(RE::TESObjectCELL* cell) {
+            if (cell) {
+                auto location = cell->GetLocation();
+                if (location) {
+                    switch (Settings::sleep_location_difficulty) {
+                    case 0:
+                        return true;
+                    case 1:
+                        return !location->HasAnyKeywordByEditorID(unsafe_areas_diff1);
+                    case 2:
+                        return location->HasAnyKeywordByEditorID(safe_areas_diff2);
+                    default:
+                        return false;
+                    }
+                }
+                 
+            }                       
+            return true;
+        }
+    };
 
 }

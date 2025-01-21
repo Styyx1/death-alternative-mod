@@ -68,9 +68,16 @@ namespace SleepEvent
         if (hours >= Settings::min_sleep_duration) {
             auto* injuryBase = Injuries::DeathInjury::GetSingleton();
             RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
-            injuryBase->RemoveAllExistingInjurySpells(player);
-            injuryBase->RemoveAttributePenalty(player);
-            logs::debug("player slept for more than {} hours", Settings::min_sleep_duration);
+            if (Utility::Locations::IsSafePlace(player->GetParentCell())) {
+                injuryBase->RemoveAllExistingInjurySpells(player);
+                injuryBase->RemoveAttributePenalty(player);
+                logs::debug("player slept for more than {} hours", Settings::min_sleep_duration);
+            }
+            else {
+                logs::debug("not a safe area, can't heal injury here");
+            }
+            
+            
         }
     }
 }

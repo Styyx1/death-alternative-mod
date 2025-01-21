@@ -17,6 +17,7 @@ public:
 	inline static float min_sleep_duration{ 8.0f };
 	inline static float stress_increase_value{ 10.0f };
 	inline static float gold_remove_percentage{ 10.0f };
+	inline static std::int32_t sleep_location_difficulty{ 1 };
 	inline static std::string stress_increase_text{ "I hope this ends well..." };
 	inline static std::string stress_decrease_text{ "I feel a bit more relaxed now!" };
 
