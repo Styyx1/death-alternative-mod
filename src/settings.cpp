@@ -17,6 +17,7 @@ void Settings::LoadSettings()
 	stress_increase_value = (float)ini.GetDoubleValue("General", "fStressIncreaseAmount", 10.0f);
 	gold_remove_percentage = (float)ini.GetDoubleValue("General", "fGoldRemovePercentage", 10.0f);
 	sleep_location_difficulty = (std::int32_t)ini.GetDoubleValue("General", "iSleepLocationDifficulty", 1);
+	kill_with_injury = ini.GetBoolValue("General", "bKillWhenInjured", false);
 	//Texts
 	stress_increase_text = ini.GetValue("Texts", "sStressIncreaseText", "I hope this ends well...");
 	stress_decrease_text = ini.GetValue("Texts", "sInjuryHealStressText", "I feel a bit more relaxed now!");
@@ -26,6 +27,7 @@ void Settings::LoadSettings()
 	LogBool("show_gold_removal_message", show_gold_removal_message);
 	LogBool("heal_enemies_on_death", heal_enemies_on_death);
 	LogBool("kill_without_gold", kill_without_gold);
+	LogBool("kill when injured", kill_with_injury);
 
 	logs::info("...loaded settings");
 

@@ -22,16 +22,33 @@ bool resurrect_only_with_gold(RE::PlayerCharacter* player) {
     }
     return true;
 }
+
+bool kill_with_inj(RE::PlayerCharacter* player)
+{
+    if (Settings::kill_with_injury) {   
+        if (Injuries::DeathInjury::GetSingleton()->injury_active) {
+            return false;
+        }
+        else
+            return true;
+    }
+    return true;
+}
+
+bool get_res_cond(RE::PlayerCharacter* player) {
+
+    return kill_with_inj(player) && resurrect_only_with_gold(player);
+
+}
+
 class ResurrectionManager : public ResurrectionAPI
 {
-    
-
     bool should_resurrect(RE::Actor* a) const override
     {
         RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
 
         if (a == player) {      
-            return resurrect_only_with_gold(player);
+            return get_res_cond(player);
         }
         else {
             return DeathEffects::Ethereal::get_count(a, Settings::cheat_death_token) && Settings::enable_npcs;

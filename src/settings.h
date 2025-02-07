@@ -13,6 +13,7 @@ public:
 	inline static bool show_gold_removal_message{ false };
 	inline static bool heal_enemies_on_death{ false };
 	inline static bool kill_without_gold{ false };
+	inline static bool kill_with_injury{ false };
 	inline static float injury_decrease_modifier{ 0.40f };
 	inline static float min_sleep_duration{ 8.0f };
 	inline static float stress_increase_value{ 10.0f };
@@ -30,10 +31,8 @@ public:
 	inline static RE::TESObjectMISC* cheat_death_token;
 	inline static RE::TESGlobal* survival_mode_active;
 	inline static RE::TESGlobal* health_penalty_ui_global;
-
 	inline static RE::TESGlobal* stress_enabled;
 	inline static RE::TESGlobal* stress_total_value;
-
 	inline static RE::EffectSetting* ethereal_effect;
 
 
