@@ -14,6 +14,9 @@ public:
 	inline static bool heal_enemies_on_death{ false };
 	inline static bool kill_without_gold{ false };
 	inline static bool kill_with_injury{ false };
+	inline static bool use_health_injury{ true }; // compatibility with blade and blunt
+	inline static bool use_stamina_injury{ true };
+	inline static bool use_magicka_injury{ true };
 	inline static float injury_decrease_modifier{ 0.40f };
 	inline static float min_sleep_duration{ 8.0f };
 	inline static float stress_increase_value{ 10.0f };

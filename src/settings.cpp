@@ -18,6 +18,9 @@ void Settings::LoadSettings()
 	gold_remove_percentage = (float)ini.GetDoubleValue("General", "fGoldRemovePercentage", 10.0f);
 	sleep_location_difficulty = (std::int32_t)ini.GetDoubleValue("General", "iSleepLocationDifficulty", 1);
 	kill_with_injury = ini.GetBoolValue("General", "bKillWhenInjured", false);
+	use_health_injury = ini.GetBoolValue("General", "bUseHealthInjury", true);
+	use_stamina_injury = ini.GetBoolValue("General", "bUseStaminaRateInjury", true);
+	use_magicka_injury = ini.GetBoolValue("General", "bUseMagickaRateInjury", true);
 	//Texts
 	stress_increase_text = ini.GetValue("Texts", "sStressIncreaseText", "I hope this ends well...");
 	stress_decrease_text = ini.GetValue("Texts", "sInjuryHealStressText", "I feel a bit more relaxed now!");
