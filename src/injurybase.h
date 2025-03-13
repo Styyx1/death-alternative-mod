@@ -25,6 +25,7 @@ namespace Injuries
 		float currentMagRatePen;
 		bool injury_active;
 		bool can_apply_stress;
+		std::int32_t injuryCount;
 
 		float GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue a_av);
 		float GetMaxHealthAv(RE::Actor* a_actor);

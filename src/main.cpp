@@ -37,6 +37,11 @@ bool kill_with_inj(RE::PlayerCharacter* player)
 
 bool get_res_cond(RE::PlayerCharacter* player) {
 
+    if (kill_with_inj) {
+        if (Injuries::DeathInjury::GetSingleton()->injuryCount > Settings::number_of_injuries) {
+            return false;
+        }
+    }
     return kill_with_inj(player) && resurrect_only_with_gold(player);
 
 }
@@ -59,17 +64,17 @@ class ResurrectionManager : public ResurrectionAPI
     {        
         if (RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton(); a == player) {
             auto* injury = Injuries::DeathInjury::GetSingleton();
-            injury->RestoreAV(a, RE::ActorValue::kStamina, 20.0f);
+            injury->RestoreAV(a, RE::ActorValue::kStamina, 50.0f);
             DeathEffects::Ethereal::SetEthereal(a);
             Utility::Spells::ApplySpell(a, a, Settings::injury_spell);
-            StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);
-            if (Settings::remove_gold) {
-                DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
-            }            
+            StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);                        
             std::jthread([=] {
                 std::this_thread::sleep_for(2s);
                 SKSE::GetTaskInterface()->AddTask([=] {
                     injury->CheckInjuryAvPenalty(a);
+                    if (Settings::remove_gold) {
+                        DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
+                    }
                     });
                 }).detach();
         }

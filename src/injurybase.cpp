@@ -21,9 +21,11 @@ void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor* a_actor)
 void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float percentPen)
 {
 	if (injury_active) {
+		if (injuryCount < 100) {
+			injuryCount++;
+		}		
 		return;
 	}
-
 	//Health:
 	if (Settings::use_health_injury) {
 		float maxPenAv = GetMaxHealthAv(a_actor);
@@ -74,10 +76,12 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 
 		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
 	}
-
 	injury_active = true;
 	can_apply_stress = true;
 	ApplyStressToDeath();
+	if (injuryCount < 100) {
+		injuryCount++;
+	}	
 	return;
 }
 
@@ -90,6 +94,7 @@ void Injuries::DeathInjury::RemoveAttributePenalty(RE::Actor* a_actor)
 		currentInjuryPenalty = 0.0f;	
 		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, currentPenaltyMag);		
 	}
+	injuryCount = 0;
 	return;
 }
 

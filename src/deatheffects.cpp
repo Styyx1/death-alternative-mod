@@ -8,13 +8,19 @@ void DeathEffects::Ethereal::SetEthereal(RE::Actor* a_actor)
 {
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::death_heal);
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::ethereal_spell);
-	
-	for (auto& actor : Utility::Actors::GetNearbyActors(a_actor, 500.0f, false)) {
+	logs::info("applied ethereal spell");
+	do {
+		a_actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kInvisibility, 1);
+		if (!Utility::Spells::ActorHasActiveMagicEffect(a_actor, Settings::ethereal_spell->avEffectSetting)) {
+			a_actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kInvisibility, 0);
+		}
+	} while (Utility::Spells::ActorHasActiveMagicEffect(a_actor, Settings::ethereal_spell->avEffectSetting));
+
+	for (auto actor : Utility::Actors::GetNearbyActors(a_actor, 500.0f, false)) {
 		if (Settings::heal_enemies_on_death) {
 			Utility::Spells::ApplySpell(actor, actor, Settings::death_heal);
+			Utility::Spells::ApplySpell(a_actor, actor, Settings::calm_spell_npcs);
 		}
-		actor->StopCombat();
-		//actor->NotifyAnimationGraph("staggerStart");
 	}
 }
 

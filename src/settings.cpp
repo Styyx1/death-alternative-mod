@@ -17,10 +17,12 @@ void Settings::LoadSettings()
 	stress_increase_value = (float)ini.GetDoubleValue("General", "fStressIncreaseAmount", 10.0f);
 	gold_remove_percentage = (float)ini.GetDoubleValue("General", "fGoldRemovePercentage", 10.0f);
 	sleep_location_difficulty = (std::int32_t)ini.GetDoubleValue("General", "iSleepLocationDifficulty", 1);
+	number_of_injuries = (std::int32_t)ini.GetDoubleValue("General", "iNumberOfInjuriesTillDeath", 3);
 	kill_with_injury = ini.GetBoolValue("General", "bKillWhenInjured", false);
 	use_health_injury = ini.GetBoolValue("General", "bUseHealthInjury", true);
 	use_stamina_injury = ini.GetBoolValue("General", "bUseStaminaRateInjury", true);
 	use_magicka_injury = ini.GetBoolValue("General", "bUseMagickaRateInjury", true);
+	use_calm_spell = ini.GetBoolValue("General", "bUseCalmSpell", false);
 	//Texts
 	stress_increase_text = ini.GetValue("Texts", "sStressIncreaseText", "I hope this ends well...");
 	stress_decrease_text = ini.GetValue("Texts", "sInjuryHealStressText", "I feel a bit more relaxed now!");
@@ -46,6 +48,7 @@ void Settings::LoadForms()
 	const int inj_dummy_effect_form = 0x804;
 	const int cheat_death_token_form = 0x809;
 	const int ethereal_npc_form = 0x80c;
+	const int calm_spell_formID = 0x2;
 	const char* mod_name = "shade-of-mortality.esp";
 
 	logs::info("loading forms...");
@@ -55,6 +58,7 @@ void Settings::LoadForms()
 	death_heal = dh->LookupForm(heal_spell_form, mod_name)->As<RE::SpellItem>();
 	injury_spell = dh->LookupForm(inj_tier_3_form, mod_name)->As<RE::SpellItem>();
 	ethereal_spell_npcs = dh->LookupForm(ethereal_npc_form, mod_name)->As<RE::SpellItem>();
+	calm_spell_npcs = dh->LookupForm(calm_spell_formID, mod_name)->As<RE::SpellItem>();
 
 	cheat_death_token = dh->LookupForm(cheat_death_token_form, mod_name)->As<RE::TESObjectMISC>();
 

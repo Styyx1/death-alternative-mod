@@ -17,6 +17,8 @@ public:
 	inline static bool use_health_injury{ true }; // compatibility with blade and blunt
 	inline static bool use_stamina_injury{ true };
 	inline static bool use_magicka_injury{ true };
+	inline static bool use_calm_spell{ false };
+	inline static std::int32_t number_of_injuries{3};
 	inline static float injury_decrease_modifier{ 0.40f };
 	inline static float min_sleep_duration{ 8.0f };
 	inline static float stress_increase_value{ 10.0f };
@@ -31,6 +33,7 @@ public:
 	inline static RE::SpellItem* injury_spell;
 	inline static RE::SpellItem* death_heal;
 	inline static RE::SpellItem* ethereal_spell_npcs;
+	inline static RE::SpellItem* calm_spell_npcs;
 	inline static RE::TESObjectMISC* cheat_death_token;
 	inline static RE::TESGlobal* survival_mode_active;
 	inline static RE::TESGlobal* health_penalty_ui_global;
