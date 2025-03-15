@@ -2,6 +2,7 @@
 
 #include "settings.h"
 #include "utility.h"
+#include "deatheffects.h"
 
 // Credits: https://github.com/colinswrath/BladeAndBlunt/blob/main/include/InjuryPenaltyManager.h
 namespace Injuries
@@ -15,17 +16,16 @@ namespace Injuries
 		DeathInjury& operator=(DeathInjury&&) = delete;
 
 	public:
-		static DeathInjury* GetSingleton() {
-			static DeathInjury singleton;
-			return &singleton;
-		}
-
+		static DeathInjury* GetSingleton();
+		inline static std::atomic_bool processing{false};
+		std::mutex mut;
 		float currentInjuryPenalty;
 		float currentStamRatePen;
 		float currentMagRatePen;
 		bool injury_active;
 		bool can_apply_stress;
 		std::int32_t injuryCount;
+		bool hasDiedThisCycle;
 
 		float GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue a_av);
 		float GetMaxHealthAv(RE::Actor* a_actor);
@@ -39,6 +39,8 @@ namespace Injuries
 		
 		void ApplyStressToDeath();
 		void HealStressFromDeath();
+
+		void HandlePlayerResurrection(RE::PlayerCharacter* player);
 		
 
 		//does not work for health, has its use for Stamina and Magicka

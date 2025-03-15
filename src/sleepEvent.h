@@ -19,10 +19,7 @@ namespace SleepEvent
 
     public:
 
-        static SleepStartHandler* GetSingleton() {
-            static SleepStartHandler singleton;
-            return &singleton;
-        }
+        static SleepStartHandler* GetSingleton();
         
         RE::BSEventNotifyControl ProcessEvent(const RE::TESSleepStartEvent* a_event, RE::BSTEventSource<RE::TESSleepStartEvent>* a_eventSource) noexcept override;
         static void RegisterSleepStart();
@@ -38,10 +35,7 @@ namespace SleepEvent
 
     public:
 
-        static SleepEventHandler* GetSingleton() {
-            static SleepEventHandler singleton;
-            return &singleton;
-        }
+        static SleepEventHandler* GetSingleton();
 
         inline static bool is_sleeping;
 

@@ -16,8 +16,8 @@ void Settings::LoadSettings()
 	min_sleep_duration = (float)ini.GetDoubleValue("General", "fSleepDuration", 8.0f);
 	stress_increase_value = (float)ini.GetDoubleValue("General", "fStressIncreaseAmount", 10.0f);
 	gold_remove_percentage = (float)ini.GetDoubleValue("General", "fGoldRemovePercentage", 10.0f);
-	sleep_location_difficulty = (std::int32_t)ini.GetDoubleValue("General", "iSleepLocationDifficulty", 1);
-	number_of_injuries = (std::int32_t)ini.GetDoubleValue("General", "iNumberOfInjuriesTillDeath", 3);
+	sleep_location_difficulty = (std::uint32_t)ini.GetDoubleValue("General", "iSleepLocationDifficulty", 1);
+	number_of_injuries = (std::uint32_t)ini.GetDoubleValue("General", "iNumberOfInjuriesTillDeath", 3);
 	kill_with_injury = ini.GetBoolValue("General", "bKillWhenInjured", false);
 	use_health_injury = ini.GetBoolValue("General", "bUseHealthInjury", true);
 	use_stamina_injury = ini.GetBoolValue("General", "bUseStaminaRateInjury", true);
@@ -26,6 +26,9 @@ void Settings::LoadSettings()
 	//Texts
 	stress_increase_text = ini.GetValue("Texts", "sStressIncreaseText", "I hope this ends well...");
 	stress_decrease_text = ini.GetValue("Texts", "sInjuryHealStressText", "I feel a bit more relaxed now!");
+
+	// calculations after getting the settings
+	number_of_injuries = std::clamp(number_of_injuries, (std::uint32_t)1, (std::uint32_t)100);
 
 	LogBool("enable npcs", enable_npcs);
 	LogBool("remove gold", remove_gold);

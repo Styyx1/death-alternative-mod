@@ -1,6 +1,12 @@
 #include "effectEvent.h"
 #include "injurybase.h"
 
+Effect::ApplyEffectEvent* Effect::ApplyEffectEvent::GetSingleton()
+{
+	static ApplyEffectEvent singleton{};
+	return std::addressof(singleton);
+}
+
 RE::BSEventNotifyControl Effect::ApplyEffectEvent::ProcessEvent(const RE::TESMagicEffectApplyEvent* a_event, RE::BSTEventSource<RE::TESMagicEffectApplyEvent>* a_eventSource) noexcept
 {
 	if (!a_event) {

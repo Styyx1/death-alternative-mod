@@ -6,6 +6,11 @@
 
 namespace SleepEvent
 {
+    SleepEventHandler* SleepEventHandler::GetSingleton()
+    {
+        static SleepEventHandler singleton{};
+        return std::addressof(singleton);
+    }
 
     RE::BSEventNotifyControl SleepEventHandler::ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>* a_eventSource) noexcept
     {
@@ -28,6 +33,12 @@ namespace SleepEvent
 
         logs::info("registered Sleep Stop Event");
 
+    }
+
+    SleepStartHandler* SleepStartHandler::GetSingleton()
+    {
+        static SleepStartHandler singleton{};
+        return std::addressof(singleton);
     }
 
     RE::BSEventNotifyControl SleepStartHandler::ProcessEvent(const RE::TESSleepStartEvent* a_event, RE::BSTEventSource<RE::TESSleepStartEvent>* a_eventSource) noexcept
@@ -65,7 +76,7 @@ namespace SleepEvent
     void ProcessSleepStop()
     {
         hours = RE::Calendar::GetSingleton()->GetHoursPassed() - hours;
-        if (hours >= Settings::min_sleep_duration) {
+        if (hours >= Settings::min_sleep_duration - 0.2) {
             auto* injuryBase = Injuries::DeathInjury::GetSingleton();
             RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
             if (Utility::Locations::IsSafePlace(player->GetParentCell())) {

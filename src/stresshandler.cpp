@@ -1,6 +1,12 @@
 #include "stresshandler.h"
 #include "settings.h"
 
+StressHandler::StressApplication* StressHandler::StressApplication::GetSingleton()
+{
+	static StressApplication singleton{};
+	return &singleton;
+}
+
 void StressHandler::StressApplication::IncreaseStress(float a_amount)
 {
 	Settings::stress_total_value->value += a_amount;

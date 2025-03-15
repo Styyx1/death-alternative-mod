@@ -25,8 +25,9 @@ bool resurrect_only_with_gold(RE::PlayerCharacter* player) {
 
 bool kill_with_inj(RE::PlayerCharacter* player)
 {
-    if (Settings::kill_with_injury) {   
-        if (Injuries::DeathInjury::GetSingleton()->injury_active) {
+    if (Settings::kill_with_injury) {
+        auto inj = Injuries::DeathInjury::GetSingleton();
+        if (inj->injury_active) {
             return false;
         }
         else
@@ -37,8 +38,9 @@ bool kill_with_inj(RE::PlayerCharacter* player)
 
 bool get_res_cond(RE::PlayerCharacter* player) {
 
-    if (kill_with_inj) {
-        if (Injuries::DeathInjury::GetSingleton()->injuryCount > Settings::number_of_injuries) {
+    if (kill_with_inj(player)) {
+        auto inj = Injuries::DeathInjury::GetSingleton();
+        if (inj->injuryCount > std::clamp(Settings::number_of_injuries - 1, (std::uint32_t)1, (std::uint32_t)100)) {
             return false;
         }
     }
@@ -48,39 +50,37 @@ bool get_res_cond(RE::PlayerCharacter* player) {
 
 class ResurrectionManager : public ResurrectionAPI
 {
-    bool should_resurrect(RE::Actor* a) const override
+    const bool should_resurrect(RE::Actor* a) override
     {
         RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
 
-        if (a == player) {      
+        if (a == player) {
             return get_res_cond(player);
         }
         else {
             return DeathEffects::Ethereal::get_count(a, Settings::cheat_death_token) && Settings::enable_npcs;
-        }        
+        }
+        return false;
     }
 
+    bool busy = false;
+    int counter = 0;
+
     void resurrect(RE::Actor* a) override
-    {        
-        if (RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton(); a == player) {
-            auto* injury = Injuries::DeathInjury::GetSingleton();
-            injury->RestoreAV(a, RE::ActorValue::kStamina, 50.0f);
-            DeathEffects::Ethereal::SetEthereal(a);
-            Utility::Spells::ApplySpell(a, a, Settings::injury_spell);
-            StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);                        
-            std::jthread([=] {
-                std::this_thread::sleep_for(2s);
-                SKSE::GetTaskInterface()->AddTask([=] {
-                    injury->CheckInjuryAvPenalty(a);
-                    if (Settings::remove_gold) {
-                        DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
-                    }
-                    });
-                }).detach();
+    {      
+        RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton(); 
+        if (a == player) {
+            if (!Injuries::DeathInjury::processing) {
+                Injuries::DeathInjury* injury = Injuries::DeathInjury::GetSingleton();
+                injury->HandlePlayerResurrection(player);
+            }            
+            return;
         }
         else {
             DeathEffects::Ethereal::ProcessNPCDeath(a);
+            return;
         }
+        return;
     }
 };
 
