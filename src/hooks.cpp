@@ -38,7 +38,6 @@ void Hooks::PlayerUpdate::PlayerUpdateHook(RE::PlayerCharacter* a_this, float a_
 {
     if (frameCount > 6.0f) {
         frameCount = 0;
-		logs::info("set ui pen");
 		auto inj = Injuries::DeathInjury::GetSingleton();
 		if (inj->injury_active && Settings::use_health_injury) {
 			inj->SetAttributePenaltyUIGlobal(Settings::injury_health_decrease / 100);
