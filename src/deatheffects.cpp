@@ -8,20 +8,13 @@ void DeathEffects::Ethereal::SetEthereal(RE::Actor* a_actor)
 {
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::death_heal);
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::ethereal_spell);
-	logs::info("applied ethereal spell");
-	do {
-		a_actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kInvisibility, 1);
-		if (!Utility::Spells::ActorHasActiveMagicEffect(a_actor, Settings::ethereal_spell->avEffectSetting)) {
-			a_actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kInvisibility, 0);
-		}
-	} while (Utility::Spells::ActorHasActiveMagicEffect(a_actor, Settings::ethereal_spell->avEffectSetting));
-
 	for (auto actor : Utility::Actors::GetNearbyActors(a_actor, 500.0f, false)) {
 		if (Settings::heal_enemies_on_death) {
 			Utility::Spells::ApplySpell(actor, actor, Settings::death_heal);
 			Utility::Spells::ApplySpell(a_actor, actor, Settings::calm_spell_npcs);
 		}
 	}
+	return;
 }
 
 void DeathEffects::Ethereal::ProcessNPCDeath(RE::Actor* a_actor)
@@ -50,7 +43,8 @@ void DeathEffects::Ethereal::RemoveGoldPlayer(RE::PlayerCharacter* player, float
 		if (Settings::show_gold_removal_message) {
 			RE::DebugNotification(std::format("{} {} removed", amount, gold->GetName()).c_str());
 		}
-		//logs::info("removed {} pieces of {}", amount, gold->As<RE::TESBoundObject>()->GetName());
-	}
+		logs::debug("removed {} pieces of {}", amount, gold->As<RE::TESBoundObject>()->GetName());
+	}	
 	return;	
 }
+

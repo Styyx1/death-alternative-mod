@@ -19,29 +19,23 @@ namespace SleepEvent
 
     public:
 
-        static SleepStartHandler* GetSingleton() {
-            static SleepStartHandler singleton;
-            return &singleton;
-        }
+        static SleepStartHandler* GetSingleton();
         
         RE::BSEventNotifyControl ProcessEvent(const RE::TESSleepStartEvent* a_event, RE::BSTEventSource<RE::TESSleepStartEvent>* a_eventSource) noexcept override;
         static void RegisterSleepStart();
     };
 
-    class SleepEventHandler final : public RE::BSTEventSink<RE::TESSleepStopEvent>
+    class SleepStopHandler final : public RE::BSTEventSink<RE::TESSleepStopEvent>
     {
-        SleepEventHandler() = default;
-        SleepEventHandler(const SleepEventHandler&) = delete;
-        SleepEventHandler(SleepEventHandler&&) = delete;
-        SleepEventHandler& operator=(const SleepEventHandler&) = delete;
-        SleepEventHandler& operator=(SleepEventHandler&&) = delete;
+        SleepStopHandler() = default;
+        SleepStopHandler(const SleepStopHandler&) = delete;
+        SleepStopHandler(SleepStopHandler&&) = delete;
+        SleepStopHandler& operator=(const SleepStopHandler&) = delete;
+        SleepStopHandler& operator=(SleepStopHandler&&) = delete;
 
     public:
 
-        static SleepEventHandler* GetSingleton() {
-            static SleepEventHandler singleton;
-            return &singleton;
-        }
+        static SleepStopHandler* GetSingleton();
 
         inline static bool is_sleeping;
 

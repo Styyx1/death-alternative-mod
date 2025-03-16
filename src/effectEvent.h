@@ -14,10 +14,7 @@ namespace Effect
 
     public:
 
-        static ApplyEffectEvent* GetSingleton() {
-            static ApplyEffectEvent singleton;
-            return &singleton;
-        }
+        static ApplyEffectEvent* GetSingleton();
 
         RE::BSEventNotifyControl ProcessEvent(const RE::TESMagicEffectApplyEvent* a_event, RE::BSTEventSource<RE::TESMagicEffectApplyEvent>* a_eventSource) noexcept override;
         static void RegisterApplyEffect();

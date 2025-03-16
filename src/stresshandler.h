@@ -12,10 +12,7 @@ namespace StressHandler
 		StressApplication& operator=(StressApplication&&) = delete;
 
 	public:
-		static StressApplication* GetSingleton() {
-			static StressApplication singleton;
-			return &singleton;
-		}
+		static StressApplication* GetSingleton();
 
 		bool stress_applied;
 

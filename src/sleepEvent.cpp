@@ -6,8 +6,13 @@
 
 namespace SleepEvent
 {
+    SleepStopHandler* SleepStopHandler::GetSingleton()
+    {
+        static SleepStopHandler singleton{};
+        return std::addressof(singleton);
+    }
 
-    RE::BSEventNotifyControl SleepEventHandler::ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>* a_eventSource) noexcept
+    RE::BSEventNotifyControl SleepStopHandler::ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>* a_eventSource) noexcept
     {
         if (!a_event) {
             contEve;
@@ -19,15 +24,21 @@ namespace SleepEvent
         contEve;
     }
 
-    void SleepEventHandler::RegisterSleepStop()
+    void SleepStopHandler::RegisterSleepStop()
     {
-        auto* eventSink = SleepEventHandler::GetSingleton();
+        auto* eventSink = SleepStopHandler::GetSingleton();
 
         auto* eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
         eventSourceHolder->AddEventSink<RE::TESSleepStopEvent>(eventSink);
 
-        logs::info("registered Sleep Stop Event");
+        logs::info("Registered <{}>", typeid(SleepStopHandler).name());
 
+    }
+
+    SleepStartHandler* SleepStartHandler::GetSingleton()
+    {
+        static SleepStartHandler singleton{};
+        return std::addressof(singleton);
     }
 
     RE::BSEventNotifyControl SleepStartHandler::ProcessEvent(const RE::TESSleepStartEvent* a_event, RE::BSTEventSource<RE::TESSleepStartEvent>* a_eventSource) noexcept
@@ -45,13 +56,13 @@ namespace SleepEvent
 
         auto* eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
         eventSourceHolder->AddEventSink<RE::TESSleepStartEvent>(eventSink);
-        logs::info("registered Sleep Start Event");
+        logs::info("Registered <{}>", typeid(SleepStartHandler).name());
     }
 
     void InstallEvents()
 
     {
-        SleepEventHandler::RegisterSleepStop();
+        SleepStopHandler::RegisterSleepStop();
         SleepStartHandler::RegisterSleepStart();
     }
 
@@ -59,13 +70,13 @@ namespace SleepEvent
 
     {
         hours = RE::Calendar::GetSingleton()->GetHoursPassed();
-        auto sleepCheck = SleepEventHandler::GetSingleton();
+        auto sleepCheck = SleepStopHandler::GetSingleton();
         sleepCheck->is_sleeping = true;
     }
     void ProcessSleepStop()
     {
         hours = RE::Calendar::GetSingleton()->GetHoursPassed() - hours;
-        if (hours >= Settings::min_sleep_duration) {
+        if (hours >= Settings::min_sleep_duration - 0.2) {
             auto* injuryBase = Injuries::DeathInjury::GetSingleton();
             RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
             if (Utility::Locations::IsSafePlace(player->GetParentCell())) {
