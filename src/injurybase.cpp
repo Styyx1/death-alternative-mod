@@ -5,7 +5,6 @@ Injuries::DeathInjury* Injuries::DeathInjury::GetSingleton()
 {
 	static DeathInjury singleton{};
 	return std::addressof(singleton);
-
 }
 
 float Injuries::DeathInjury::GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue a_av)
@@ -15,23 +14,24 @@ float Injuries::DeathInjury::GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue
 //main function to call, leads to the other necessary functions
 void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor* a_actor)
 {
-	if (a_actor->HasSpell(Settings::injury_spell)) {
-		if (!injury_active) {
-			ApplyAttributePenalty(a_actor, Settings::injury_decrease_modifier);
-		} 
-		else if (!hasDiedThisCycle) {  // Only increase injuryCount once per new death cycle
+	if (a_actor->HasSpell(Settings::injury_spell)) {		
+		if (!injury_active) {			
+			ApplyAttributePenalty(a_actor, Settings::injury_health_decrease, Settings::injury_stam_decrease, Settings::injury_mag_decrease);
 			injuryCount++;
-			hasDiedThisCycle = true;  // Prevent further increments this cycle
+		} 
+		else if (!hasDiedThisCycle) {  
+			injuryCount++;
+			hasDiedThisCycle = true;  
 		}
 		return;
 	} else {
 		RemoveAttributePenalty(a_actor);
-		hasDiedThisCycle = false;  // Reset when the injury is removed
+		hasDiedThisCycle = false; 
 	}
 	return;
 }
 
-void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float percentPen)
+void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float penalty_health, float penalty_stam, float penalty_mag)
 {
 	injury_active = true;
 	RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
@@ -39,22 +39,28 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 	if (Settings::use_health_injury) {
 		float maxPenAv = GetMaxHealthAv(a_actor);
 		float lastPenaltyMag = currentInjuryPenalty;
-		float modifier = percentPen / 100;
+		float modifier = penalty_health / 100;
 		float newPenaltyMag = std::roundf(maxPenAv * modifier);
+
 		if (newPenaltyMag > maxPenAv) {
 			newPenaltyMag = maxPenAv;
 		}
+
 		auto magDelta = lastPenaltyMag - newPenaltyMag;
 		currentInjuryPenalty = newPenaltyMag; //Set tracker av not actual damage
 
-		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealRate, magDelta);	//Damage or restore AV
+		// wait 0.5 second to reduce health cause it does not regenerate fast enough otherwise and kills you again. RestoreActorValue does not work for Health for some reason so i had to use a spell instead.
+		std::jthread([=] {
+			std::this_thread::sleep_for(0.5s);
+			player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta); //Damage or restore AV
+			}).detach();		
 	}	
 
 	//Stamina rate:
 	if (Settings::use_stamina_injury) {
 		float maxStamPenAv = GetMaxStaminaRate(a_actor);
 		float lastPenaltyStamRate = currentStamRatePen;
-		float stamRModi = percentPen / 100;
+		float stamRModi = penalty_stam / 100;
 		float newStamRateMag = std::roundf(maxStamPenAv * stamRModi);
 		if (newStamRateMag > maxStamPenAv) {
 			newStamRateMag = maxStamPenAv;
@@ -69,7 +75,7 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 	if (Settings::use_magicka_injury) {
 		float maxmagickPenAv = GetMaxMagickaRate(a_actor);
 		float lastPenaltymagickRate = currentMagRatePen;
-		float magickRModi = percentPen / 100;
+		float magickRModi = penalty_mag / 100;
 		float newmagickRateMag = std::roundf(maxmagickPenAv * magickRModi);
 		if (newmagickRateMag > maxmagickPenAv) {
 			newmagickRateMag = maxmagickPenAv;
@@ -84,6 +90,7 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor* a_actor, float perc
 	return;
 }
 	
+int counter = 0;
 
 
 void Injuries::DeathInjury::RemoveAttributePenalty(RE::Actor* a_actor)
@@ -94,8 +101,9 @@ void Injuries::DeathInjury::RemoveAttributePenalty(RE::Actor* a_actor)
 	injury_active = false;
 	HealStressFromDeath();
 	if (currentPenaltyHealthMag > 0) {
-		currentInjuryPenalty = 0.0f;	
-		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealRate, currentPenaltyHealthMag);		
+		currentInjuryPenalty = 0.0f;
+		SetAttributePenaltyUIGlobal(0.0f);
+		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, currentPenaltyHealthMag);		
 	}
 	if (currMagPenalty > 0) {
 		currentMagRatePen = 0.0f;
@@ -138,7 +146,7 @@ void Injuries::DeathInjury::ApplyStressToDeath()
 	if (can_apply_stress && Settings::is_stress_mod_active && Settings::stress_enabled->value != 0) {
 		auto* stress = StressHandler::StressApplication::GetSingleton();
 		stress->ApplyStressOnce();
-		can_apply_stress = false;
+		can_apply_stress = false;			
 	}
 }
 
@@ -152,24 +160,35 @@ void Injuries::DeathInjury::HealStressFromDeath()
 }
 
 void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter* player)
-{
-	mut.lock();
-	processing = true;
-	float total = GetMaxHealthAv(player);
-	float to_res = std::max(0.0f, total - player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth));
-	RestoreAV(player, RE::ActorValue::kStamina, 50.0f);
-	DeathEffects::Ethereal::SetEthereal(player);
-	RE::DebugNotification("player died");
-	Utility::Spells::ApplySpell(player, player, Settings::injury_spell);
-	StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);
-	CheckInjuryAvPenalty(player);
+{	
+	counter++;
+	if (counter == 1) {
+		Utility::Spells::ApplySpell(player, player, Settings::injury_spell);
+		
+		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, 50.0f);
+		
+		DeathEffects::Ethereal::SetEthereal(player);
+		StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);
 
-	if (Settings::remove_gold) {
-		DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
+		if (Settings::remove_gold) {
+			DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
+		}
+		CheckInjuryAvPenalty(player);
+		hasDiedThisCycle = false;
+		processing = false;
+		std::jthread([=] {
+			std::this_thread::sleep_for(50ms);
+				counter = 0;
+			}).detach();
+		return;
 	}
-
-	hasDiedThisCycle = false;
-	processing = false;
-	mut.unlock();
-	return;
+	else {
+		std::jthread([=] {
+			std::this_thread::sleep_for(50ms);
+			counter = 0;
+			}).detach();
+		return;
+	}
+		
+	
 }

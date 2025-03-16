@@ -14,4 +14,13 @@ namespace Hooks
 		static inline REL::Relocation<decltype(&PlayerUsePotion)> _PlayerUsePotion;
 
 	};
+
+	struct PlayerUpdate {
+		static void Install();
+
+	private:
+		static void PlayerUpdateHook(RE::PlayerCharacter* a_this, float a_delta);
+		static inline float frameCount = 0;
+		static inline REL::Relocation<decltype(&PlayerUpdateHook)> _func;
+	};
 }

@@ -23,34 +23,21 @@ bool resurrect_only_with_gold(RE::PlayerCharacter* player) {
     return true;
 }
 
-bool kill_with_inj(RE::PlayerCharacter* player)
-{
-    if (Settings::kill_with_injury) {
-        auto inj = Injuries::DeathInjury::GetSingleton();
-        if (inj->injury_active) {
-            return false;
-        }
-        else
-            return true;
-    }
-    return true;
-}
-
 bool get_res_cond(RE::PlayerCharacter* player) {
 
-    if (kill_with_inj(player)) {
-        auto inj = Injuries::DeathInjury::GetSingleton();
-        if (inj->injuryCount > std::clamp(Settings::number_of_injuries - 1, (std::uint32_t)1, (std::uint32_t)100)) {
-            return false;
+    auto inj = Injuries::DeathInjury::GetSingleton();
+    bool should_res = true;
+    if (Settings::number_of_injuries > 0) {
+        if (inj->injuryCount > Settings::number_of_injuries) {
+            should_res =  false;
         }
     }
-    return kill_with_inj(player) && resurrect_only_with_gold(player);
-
+    return should_res && resurrect_only_with_gold(player);
 }
 
 class ResurrectionManager : public ResurrectionAPI
 {
-    const bool should_resurrect(RE::Actor* a) override
+    bool should_resurrect(RE::Actor* a) const override
     {
         RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
 
@@ -67,14 +54,12 @@ class ResurrectionManager : public ResurrectionAPI
     int counter = 0;
 
     void resurrect(RE::Actor* a) override
-    {      
+    {   
         RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton(); 
+        Injuries::DeathInjury* injury = Injuries::DeathInjury::GetSingleton();
         if (a == player) {
-            if (!Injuries::DeathInjury::processing) {
-                Injuries::DeathInjury* injury = Injuries::DeathInjury::GetSingleton();
-                injury->HandlePlayerResurrection(player);
-            }            
-            return;
+            injury->HandlePlayerResurrection(player); 
+            return;                
         }
         else {
             DeathEffects::Ethereal::ProcessNPCDeath(a);
@@ -101,6 +86,7 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
         Hooks::InstallHooks();
         Effect::InstallEvents();
 		SleepEvent::InstallEvents();
+
 		addSubscriber();
 	}
     if (a_msg->type == SKSE::MessagingInterface::kPostLoadGame) {
@@ -115,7 +101,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 {
 	SKSE::Init(a_skse);
 	SKSE::GetMessagingInterface()->RegisterListener(InitListener);
-    SKSE::AllocTrampoline(14);
+    SKSE::AllocTrampoline(14 * 2);
     if (auto serialization = SKSE::GetSerializationInterface()) {
         serialization->SetUniqueID(Serialisation::ID);
         serialization->SetSaveCallback(&Serialisation::SaveCallback);

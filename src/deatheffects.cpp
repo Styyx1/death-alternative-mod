@@ -8,7 +8,6 @@ void DeathEffects::Ethereal::SetEthereal(RE::Actor* a_actor)
 {
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::death_heal);
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::ethereal_spell);
-	logs::info("applied ethereal spell");
 	for (auto actor : Utility::Actors::GetNearbyActors(a_actor, 500.0f, false)) {
 		if (Settings::heal_enemies_on_death) {
 			Utility::Spells::ApplySpell(actor, actor, Settings::death_heal);
@@ -44,7 +43,7 @@ void DeathEffects::Ethereal::RemoveGoldPlayer(RE::PlayerCharacter* player, float
 		if (Settings::show_gold_removal_message) {
 			RE::DebugNotification(std::format("{} {} removed", amount, gold->GetName()).c_str());
 		}
-		logs::info("removed {} pieces of {}", amount, gold->As<RE::TESBoundObject>()->GetName());
+		logs::debug("removed {} pieces of {}", amount, gold->As<RE::TESBoundObject>()->GetName());
 	}	
 	return;	
 }
