@@ -25,17 +25,17 @@ namespace SleepEvent
         static void RegisterSleepStart();
     };
 
-    class SleepEventHandler final : public RE::BSTEventSink<RE::TESSleepStopEvent>
+    class SleepStopHandler final : public RE::BSTEventSink<RE::TESSleepStopEvent>
     {
-        SleepEventHandler() = default;
-        SleepEventHandler(const SleepEventHandler&) = delete;
-        SleepEventHandler(SleepEventHandler&&) = delete;
-        SleepEventHandler& operator=(const SleepEventHandler&) = delete;
-        SleepEventHandler& operator=(SleepEventHandler&&) = delete;
+        SleepStopHandler() = default;
+        SleepStopHandler(const SleepStopHandler&) = delete;
+        SleepStopHandler(SleepStopHandler&&) = delete;
+        SleepStopHandler& operator=(const SleepStopHandler&) = delete;
+        SleepStopHandler& operator=(SleepStopHandler&&) = delete;
 
     public:
 
-        static SleepEventHandler* GetSingleton();
+        static SleepStopHandler* GetSingleton();
 
         inline static bool is_sleeping;
 

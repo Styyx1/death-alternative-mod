@@ -6,13 +6,13 @@
 
 namespace SleepEvent
 {
-    SleepEventHandler* SleepEventHandler::GetSingleton()
+    SleepStopHandler* SleepStopHandler::GetSingleton()
     {
-        static SleepEventHandler singleton{};
+        static SleepStopHandler singleton{};
         return std::addressof(singleton);
     }
 
-    RE::BSEventNotifyControl SleepEventHandler::ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>* a_eventSource) noexcept
+    RE::BSEventNotifyControl SleepStopHandler::ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>* a_eventSource) noexcept
     {
         if (!a_event) {
             contEve;
@@ -24,14 +24,14 @@ namespace SleepEvent
         contEve;
     }
 
-    void SleepEventHandler::RegisterSleepStop()
+    void SleepStopHandler::RegisterSleepStop()
     {
-        auto* eventSink = SleepEventHandler::GetSingleton();
+        auto* eventSink = SleepStopHandler::GetSingleton();
 
         auto* eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
         eventSourceHolder->AddEventSink<RE::TESSleepStopEvent>(eventSink);
 
-        logs::info("registered Sleep Stop Event");
+        logs::info("Registered <{}>", typeid(SleepStopHandler).name());
 
     }
 
@@ -56,13 +56,13 @@ namespace SleepEvent
 
         auto* eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
         eventSourceHolder->AddEventSink<RE::TESSleepStartEvent>(eventSink);
-        logs::info("registered Sleep Start Event");
+        logs::info("Registered <{}>", typeid(SleepStartHandler).name());
     }
 
     void InstallEvents()
 
     {
-        SleepEventHandler::RegisterSleepStop();
+        SleepStopHandler::RegisterSleepStop();
         SleepStartHandler::RegisterSleepStart();
     }
 
@@ -70,7 +70,7 @@ namespace SleepEvent
 
     {
         hours = RE::Calendar::GetSingleton()->GetHoursPassed();
-        auto sleepCheck = SleepEventHandler::GetSingleton();
+        auto sleepCheck = SleepStopHandler::GetSingleton();
         sleepCheck->is_sleeping = true;
     }
     void ProcessSleepStop()
