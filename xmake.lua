@@ -21,6 +21,9 @@ add_rules("mode.debug", "mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
 set_defaultmode("releasedbg")
 
+-- configs
+set_config("rex_ini", true)
+
 -- packages
 add_requires("simpleini")
 add_requires("spdlog", { configs = { header_only = false } })
@@ -33,6 +36,7 @@ target("shades-of-mortality")
     -- add dependencies to target
     add_deps("commonlibsse-ng")
     add_packages("fmt", "spdlog", "simpleini")
+    add_options("rex_ini")
 
     -- add commonlibsse-ng plugin
     add_rules("commonlibsse-ng.plugin", {

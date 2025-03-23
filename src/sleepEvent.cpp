@@ -1,23 +1,24 @@
 #include "sleepEvent.h"
 #include "injurybase.h"
 
-
 #define contEve return RE::BSEventNotifyControl::kContinue
 
 namespace SleepEvent
 {
-    SleepStopHandler* SleepStopHandler::GetSingleton()
+    SleepStopHandler *SleepStopHandler::GetSingleton()
     {
         static SleepStopHandler singleton{};
         return std::addressof(singleton);
     }
 
-    RE::BSEventNotifyControl SleepStopHandler::ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>* a_eventSource) noexcept
+    RE::BSEventNotifyControl SleepStopHandler::ProcessEvent(const RE::TESSleepStopEvent *a_event, RE::BSTEventSource<RE::TESSleepStopEvent> *a_eventSource) noexcept
     {
-        if (!a_event) {
+        if (!a_event)
+        {
             contEve;
         }
-        if (a_event->interrupted) {
+        if (a_event->interrupted)
+        {
             contEve;
         }
         ProcessSleepStop();
@@ -26,24 +27,24 @@ namespace SleepEvent
 
     void SleepStopHandler::RegisterSleepStop()
     {
-        auto* eventSink = SleepStopHandler::GetSingleton();
+        auto *eventSink = SleepStopHandler::GetSingleton();
 
-        auto* eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
+        auto *eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
         eventSourceHolder->AddEventSink<RE::TESSleepStopEvent>(eventSink);
 
         logs::info("Registered <{}>", typeid(SleepStopHandler).name());
-
     }
 
-    SleepStartHandler* SleepStartHandler::GetSingleton()
+    SleepStartHandler *SleepStartHandler::GetSingleton()
     {
         static SleepStartHandler singleton{};
         return std::addressof(singleton);
     }
 
-    RE::BSEventNotifyControl SleepStartHandler::ProcessEvent(const RE::TESSleepStartEvent* a_event, RE::BSTEventSource<RE::TESSleepStartEvent>* a_eventSource) noexcept
+    RE::BSEventNotifyControl SleepStartHandler::ProcessEvent(const RE::TESSleepStartEvent *a_event, RE::BSTEventSource<RE::TESSleepStartEvent> *a_eventSource) noexcept
     {
-        if (!a_event) {
+        if (!a_event)
+        {
             contEve;
         }
         ProcessSleepStart();
@@ -52,9 +53,9 @@ namespace SleepEvent
 
     void SleepStartHandler::RegisterSleepStart()
     {
-        auto* eventSink = SleepStartHandler::GetSingleton();
+        auto *eventSink = SleepStartHandler::GetSingleton();
 
-        auto* eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
+        auto *eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
         eventSourceHolder->AddEventSink<RE::TESSleepStartEvent>(eventSink);
         logs::info("Registered <{}>", typeid(SleepStartHandler).name());
     }
@@ -76,19 +77,19 @@ namespace SleepEvent
     void ProcessSleepStop()
     {
         hours = RE::Calendar::GetSingleton()->GetHoursPassed() - hours;
-        if (hours >= Settings::min_sleep_duration - 0.2) {
-            auto* injuryBase = Injuries::DeathInjury::GetSingleton();
-            RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
-            if (Utility::Locations::IsSafePlace(player->GetParentCell())) {
-                injuryBase->RemoveAllExistingInjurySpells(player);
-                injuryBase->RemoveAttributePenalty(player);
+        if (hours >= Settings::min_sleep_duration - 0.2)
+        {
+            RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
+            if (Utility::Locations::IsSafePlace(player->GetParentCell()))
+            {
+                Injuries::DeathInjury::RemoveAllExistingInjurySpells(player);
+                Injuries::DeathInjury::RemoveAttributePenalty(player);
                 logs::debug("player slept for more than {} hours", Settings::min_sleep_duration);
             }
-            else {
+            else
+            {
                 logs::debug("not a safe area, can't heal injury here");
             }
-            
-            
         }
     }
 }

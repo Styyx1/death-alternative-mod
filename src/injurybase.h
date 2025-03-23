@@ -9,37 +9,30 @@ namespace Injuries
 {
 	class DeathInjury
 	{
-		DeathInjury() = default;
-		DeathInjury(const DeathInjury&) = delete;
-		DeathInjury(DeathInjury&&) = delete;
-		DeathInjury& operator=(const DeathInjury&) = delete;
-		DeathInjury& operator=(DeathInjury&&) = delete;
-
 	public:
-		static DeathInjury* GetSingleton();
 		inline static bool processing{false};
-		float currentInjuryPenalty;
-		float currentStamRatePen;
-		float currentMagRatePen;
-		bool injury_active;
-		bool can_apply_stress;
-		std::int32_t injuryCount;
-		bool hasDiedThisCycle;
+		inline static float currentInjuryPenalty;
+		inline static float currentStamRatePen;
+		inline static float currentMagRatePen;
+		inline static bool injury_active;
+		inline static bool can_apply_stress;
+		inline static std::int32_t injuryCount;
+		inline static bool hasDiedThisCycle;
 
-		float GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue a_av);
-		float GetMaxHealthAv(RE::Actor* a_actor);
-		float GetMaxStaminaRate(RE::Actor* a_actor);
-		float GetMaxMagickaRate(RE::Actor* a_actor);
+		static float GetMaxActorValue(RE::Actor* a_actor, RE::ActorValue a_av);
+		static float GetMaxHealthAv(RE::Actor* a_actor);
+		static float GetMaxStaminaRate(RE::Actor* a_actor);
+		static float GetMaxMagickaRate(RE::Actor* a_actor);
 
-		void CheckInjuryAvPenalty(RE::Actor* a_actor);
-		void ApplyAttributePenalty(RE::Actor* a_actor, float penalty_health, float penalty_stam, float penalty_mag);
-		void RemoveAttributePenalty(RE::Actor* a_actor);
-		void RemoveAllExistingInjurySpells(RE::Actor* a);
+		static void CheckInjuryAvPenalty(RE::Actor* a_actor);
+		static void ApplyAttributePenalty(RE::Actor* a_actor, float penalty_health, float penalty_stam, float penalty_mag);
+		static void RemoveAttributePenalty(RE::Actor* a_actor);
+		static void RemoveAllExistingInjurySpells(RE::Actor* a);
 		
-		void ApplyStressToDeath();
-		void HealStressFromDeath();
+		static void ApplyStressToDeath();
+		static void HealStressFromDeath();
 
-		void HandlePlayerResurrection(RE::PlayerCharacter* player);
+		static void HandlePlayerResurrection(RE::PlayerCharacter* player);
 
 		//does not work for health, has its use for Stamina and Magicka
 		inline static void RestoreAV(RE::Actor* a_actor, RE::ActorValue a_av, float a_value)

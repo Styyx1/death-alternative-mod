@@ -13,7 +13,6 @@ namespace Utility
                 std::vector<RE::Actor*> result;
                 if (const auto processLists = RE::ProcessLists::GetSingleton(); processLists) {
                     if (a_ignorePlayer && processLists->numberHighActors == 0) {
-                        logs::debug("no process list");
                         return result;
                     }
 
@@ -37,7 +36,6 @@ namespace Utility
                     }
 
                     if (!result.empty()) {
-                        logs::debug("vector is not empty");
                         return result;
                     }
                 }
