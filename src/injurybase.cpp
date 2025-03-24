@@ -17,6 +17,7 @@ void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor *a_actor)
 		}
 		else if (!hasDiedThisCycle)
 		{
+			Utility::Spells::ApplySpell(a_actor, a_actor, Settings::temp_injury_spell);
 			injuryCount++;
 			hasDiedThisCycle = true;
 		}
@@ -174,6 +175,7 @@ void Injuries::DeathInjury::HealStressFromDeath()
 void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player)
 {
 	counter++;
+	logs::info("counter is {}", counter);
 	if (counter == 1)
 	{
 		Utility::Spells::ApplySpell(player, player, Settings::injury_spell);
@@ -187,12 +189,29 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 		{
 			DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
 		}
-		CheckInjuryAvPenalty(player);
+		if (player->HasPerk(Settings::lady_stone_perk))
+		{
+#undef GetObject
+			RE::TESForm *const gold = RE::BGSDefaultObjectManager::GetSingleton()->GetObject(RE::DEFAULT_OBJECT::kGold);
+			if (player->GetItemCount(gold->As<RE::TESBoundObject>()) >= Settings::gold_tax_global->value)
+			{
+				player->RemoveItem(gold->As<RE::TESBoundObject>(), Settings::gold_tax_global->value, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr, nullptr);
+			}
+			else
+			{
+				CheckInjuryAvPenalty(player);
+			}
+		}
+		else
+		{
+			CheckInjuryAvPenalty(player);
+		}
+		logs::info("check death");
 		hasDiedThisCycle = false;
 		processing = false;
 		std::jthread([=]
 					 {
-			std::this_thread::sleep_for(50ms);
+			std::this_thread::sleep_for(3s);
 				counter = 0; })
 			.detach();
 		return;
@@ -201,7 +220,7 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 	{
 		std::jthread([=]
 					 {
-			std::this_thread::sleep_for(50ms);
+			std::this_thread::sleep_for(3s);
 			counter = 0; })
 			.detach();
 		return;

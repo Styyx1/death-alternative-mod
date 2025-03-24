@@ -8,12 +8,12 @@ void DeathEffects::Ethereal::SetEthereal(RE::Actor *a_actor)
 {
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::death_heal);
 	Utility::Spells::ApplySpell(a_actor, a_actor, Settings::ethereal_spell);
-	for (auto actor : Utility::Actors::GetNearbyActors(a_actor, 500.0f, false))
+	for (auto actor : Utility::Actors::GetNearbyActors(a_actor, 2000.0f, false))
 	{
 		if (Settings::heal_enemies_on_death)
 		{
 			Utility::Spells::ApplySpell(actor, actor, Settings::death_heal);
-			Utility::Spells::ApplySpell(a_actor, actor, Settings::calm_spell_npcs);
+			Utility::Spells::ApplySpell(actor, actor, Settings::calm_spell_npcs);
 		}
 	}
 	return;

@@ -50,6 +50,11 @@ public:
 	inline static RE::EffectSetting* ethereal_effect;
 	inline static RE::EffectSetting* injury_display_effect;
 
+	//apostasy specific stuff
+	inline static RE::TESGlobal* gold_tax_global;
+	inline static RE::SpellItem* temp_injury_spell;
+	inline static RE::BGSPerk* lady_stone_perk;
+
 	template<typename T>
 	static void LogNumber(std::string setting_name, T value) {
 		// Process value of type T
