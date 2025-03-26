@@ -10,13 +10,16 @@ void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor *a_actor)
 {
 	if (a_actor->HasSpell(Settings::injury_spell))
 	{
+		auto player = RE::PlayerCharacter::GetSingleton();
 		if (!injury_active)
 		{
+			logs::info("injury is not active");
 			ApplyAttributePenalty(a_actor, Settings::injury_health_decrease, Settings::injury_stam_decrease, Settings::injury_mag_decrease);
 			injuryCount++;
 		}
 		else if (!hasDiedThisCycle)
 		{
+			Utility::Spells::ApplySpell(a_actor, a_actor, Settings::temp_injury_spell);
 			injuryCount++;
 			hasDiedThisCycle = true;
 		}
@@ -34,67 +37,74 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float pena
 {
 	injury_active = true;
 	RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
-	// Heal rate:
-	if (Settings::use_health_injury)
-	{
-		float maxPenAv = GetMaxHealthAv(a_actor);
-		float lastPenaltyMag = currentInjuryPenalty;
-		float modifier = penalty_health / 100;
-		float newPenaltyMag = std::roundf(maxPenAv * modifier);
 
-		if (newPenaltyMag > maxPenAv)
+	if (CheckLadyStoneGold(player))
+	{
+		// Heal rate:
+		if (Settings::use_health_injury)
 		{
-			newPenaltyMag = maxPenAv;
+			float maxPenAv = GetMaxHealthAv(a_actor);
+			float lastPenaltyMag = currentInjuryPenalty;
+			float modifier = penalty_health / 100;
+			float newPenaltyMag = std::roundf(maxPenAv * modifier);
+
+			if (newPenaltyMag > maxPenAv)
+			{
+				newPenaltyMag = maxPenAv;
+			}
+
+			auto magDelta = lastPenaltyMag - newPenaltyMag;
+			currentInjuryPenalty = newPenaltyMag; // Set tracker av not actual damage
+
+			// wait 0.5 second to reduce health cause it does not regenerate fast enough otherwise and kills you again. RestoreActorValue does not work for me for some reason so i had to use a spell instead.
+			std::jthread([=]
+						 {
+							 std::this_thread::sleep_for(0.5s);
+							 player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta); // Damage or restore AV
+						 })
+				.detach();
 		}
 
-		auto magDelta = lastPenaltyMag - newPenaltyMag;
-		currentInjuryPenalty = newPenaltyMag; // Set tracker av not actual damage
-
-		// wait 0.5 second to reduce health cause it does not regenerate fast enough otherwise and kills you again. RestoreActorValue does not work for me for some reason so i had to use a spell instead.
-		std::jthread([=]
-					 {
-						 std::this_thread::sleep_for(0.5s);
-						 player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta); // Damage or restore AV
-					 })
-			.detach();
-	}
-
-	// Stamina rate:
-	if (Settings::use_stamina_injury)
-	{
-		float maxStamPenAv = GetMaxStaminaRate(a_actor);
-		float lastPenaltyStamRate = currentStamRatePen;
-		float stamRModi = penalty_stam / 100;
-		float newStamRateMag = std::roundf(maxStamPenAv * stamRModi);
-		if (newStamRateMag > maxStamPenAv)
+		// Stamina rate:
+		if (Settings::use_stamina_injury)
 		{
-			newStamRateMag = maxStamPenAv;
+			float maxStamPenAv = GetMaxStaminaRate(a_actor);
+			float lastPenaltyStamRate = currentStamRatePen;
+			float stamRModi = penalty_stam / 100;
+			float newStamRateMag = std::roundf(maxStamPenAv * stamRModi);
+			if (newStamRateMag > maxStamPenAv)
+			{
+				newStamRateMag = maxStamPenAv;
+			}
+			auto stamRateMagDelta = lastPenaltyStamRate - newStamRateMag;
+			currentStamRatePen = newStamRateMag;
+
+			a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kStaminaRate, stamRateMagDelta);
 		}
-		auto stamRateMagDelta = lastPenaltyStamRate - newStamRateMag;
-		currentStamRatePen = newStamRateMag;
 
-		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kStaminaRate, stamRateMagDelta);
-	}
-
-	// Magicka rate:
-	if (Settings::use_magicka_injury)
-	{
-		float maxmagickPenAv = GetMaxMagickaRate(a_actor);
-		float lastPenaltymagickRate = currentMagRatePen;
-		float magickRModi = penalty_mag / 100;
-		float newmagickRateMag = std::roundf(maxmagickPenAv * magickRModi);
-		if (newmagickRateMag > maxmagickPenAv)
+		// Magicka rate:
+		if (Settings::use_magicka_injury)
 		{
-			newmagickRateMag = maxmagickPenAv;
-		}
-		auto magickRateMagDelta = lastPenaltymagickRate - newmagickRateMag;
-		currentMagRatePen = newmagickRateMag;
+			float maxmagickPenAv = GetMaxMagickaRate(a_actor);
+			float lastPenaltymagickRate = currentMagRatePen;
+			float magickRModi = penalty_mag / 100;
+			float newmagickRateMag = std::roundf(maxmagickPenAv * magickRModi);
+			if (newmagickRateMag > maxmagickPenAv)
+			{
+				newmagickRateMag = maxmagickPenAv;
+			}
+			auto magickRateMagDelta = lastPenaltymagickRate - newmagickRateMag;
+			currentMagRatePen = newmagickRateMag;
 
-		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
+			a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
+		}
+		can_apply_stress = true;
+		ApplyStressToDeath();
+		return;
 	}
-	can_apply_stress = true;
-	ApplyStressToDeath();
-	return;
+	else {
+		return;
+	}
 }
 
 int counter = 0;
@@ -206,4 +216,20 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 			.detach();
 		return;
 	}
+}
+#undef GetObject
+bool Injuries::DeathInjury::CheckLadyStoneGold(RE::PlayerCharacter *player)
+{
+	if (player->HasPerk(Settings::lady_stone_perk))
+	{
+		RE::TESForm *const gold = RE::BGSDefaultObjectManager::GetSingleton()->GetObject(RE::DEFAULT_OBJECT::kGold);
+		if (player->GetItemCount(gold->As<RE::TESBoundObject>()) >= Settings::gold_tax_global->value)
+		{
+			logs::info("player has tax money, will return to use gold instead of injury");
+			player->RemoveItem(gold->As<RE::TESBoundObject>(), Settings::gold_tax_global->value, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr, nullptr);
+			player->RemoveSpell(Settings::injury_spell);
+			return false;
+		}
+	}
+	return true;
 }

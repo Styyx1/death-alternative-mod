@@ -82,8 +82,9 @@ namespace SleepEvent
             RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
             if (Utility::Locations::IsSafePlace(player->GetParentCell()))
             {
-                Injuries::DeathInjury::RemoveAllExistingInjurySpells(player);
-                Injuries::DeathInjury::RemoveAttributePenalty(player);
+                auto injManager = Injuries::DeathInjury::GetSingleton();
+                injManager->DeathInjury::RemoveAllExistingInjurySpells(player);
+                injManager->DeathInjury::RemoveAttributePenalty(player);
                 logs::debug("player slept for more than {} hours", Settings::min_sleep_duration);
             }
             else

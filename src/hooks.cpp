@@ -19,10 +19,11 @@ void Hooks::PlayerPotionUsed::PlayerUsePotion(uint64_t self, RE::AlchemyItem *al
 {
 	if (alch->HasKeywordString("CureInjury"))
 	{
+		auto injManager = Injuries::DeathInjury::GetSingleton();
 		RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
-		Injuries::DeathInjury::RemoveAttributePenalty(player);
-		Injuries::DeathInjury::RemoveAllExistingInjurySpells(player);
-		Injuries::DeathInjury::HealStressFromDeath();
+		injManager->RemoveAttributePenalty(player);
+		injManager->RemoveAllExistingInjurySpells(player);
+		injManager->HealStressFromDeath();
 	}
 	return _PlayerUsePotion(self, alch, extralist);
 }
@@ -36,9 +37,10 @@ void Hooks::PlayerUpdate::Install()
 
 void Hooks::PlayerUpdate::PlayerUpdateHook(RE::PlayerCharacter *a_this, float a_delta)
 {
-	if (Injuries::DeathInjury::injury_active && Settings::use_health_injury)
+	auto injManager = Injuries::DeathInjury::GetSingleton();
+	if (injManager->injury_active && injManager->currentInjuryPenalty != 0 && Settings::use_health_injury)
 	{
-		Injuries::DeathInjury::SetAttributePenaltyUIGlobal(Settings::injury_health_decrease / 100);
+		injManager->SetAttributePenaltyUIGlobal(Settings::injury_health_decrease / 100);
 	}
 	_func(a_this, a_delta);
 }

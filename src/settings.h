@@ -27,6 +27,8 @@ public:
 	inline static float injury_health_decrease{ 0.40f };
 	inline static float injury_stam_decrease{ 0.40f };
 	inline static float injury_mag_decrease{ 0.40f };
+
+	inline static bool debug_logging{false};
 	//int
 	inline static std::uint32_t number_of_injuries{3};
 	inline static std::uint32_t sleep_location_difficulty{ 1 };
@@ -49,6 +51,11 @@ public:
 	inline static RE::TESGlobal* stress_total_value;
 	inline static RE::EffectSetting* ethereal_effect;
 	inline static RE::EffectSetting* injury_display_effect;
+
+	//apostasy specific stuff
+ 	inline static RE::TESGlobal* gold_tax_global;
+ 	inline static RE::SpellItem* temp_injury_spell;
+ 	inline static RE::BGSPerk* lady_stone_perk;
 
 	template<typename T>
 	static void LogNumber(std::string setting_name, T value) {

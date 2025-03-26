@@ -31,9 +31,10 @@ bool get_res_cond(RE::PlayerCharacter *player)
 {
 
     bool should_res = true;
+    auto injManager = Injuries::DeathInjury::GetSingleton();
     if (Settings::number_of_injuries > 0)
     {
-        if (Injuries::DeathInjury::injuryCount > Settings::number_of_injuries)
+        if (injManager->injuryCount > Settings::number_of_injuries)
         {
             should_res = false;
         }
@@ -59,13 +60,17 @@ class ResurrectionManager : public ResurrectionAPI
 
     bool busy = false;
     int counter = 0;
+    int debugCounter = 0;
 
     void resurrect(RE::Actor *a) override
     {
         RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
         if (a == player)
         {
-            Injuries::DeathInjury::HandlePlayerResurrection(player);
+            debugCounter++;
+            logs::info("player died for the {}th time" , debugCounter);
+            auto injManager = Injuries::DeathInjury::GetSingleton();
+            injManager->HandlePlayerResurrection(player);
             return;
         }
         else
@@ -102,10 +107,8 @@ void InitListener(SKSE::MessagingInterface::Message *a_msg)
     }
     if (a_msg->type == SKSE::MessagingInterface::kPostLoadGame)
     {
-        if (Injuries::DeathInjury::injury_active)
-        {
-            Injuries::DeathInjury::CheckInjuryAvPenalty(RE::PlayerCharacter::GetSingleton());
-        }
+        auto injManager = Injuries::DeathInjury::GetSingleton();
+        injManager->CheckInjuryAvPenalty(RE::PlayerCharacter::GetSingleton());
     }
 }
 

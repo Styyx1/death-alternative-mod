@@ -17,12 +17,13 @@ namespace Serialisation
 		}
 		else
 		{
-			auto penToSerialize = Injuries::DeathInjury::currentInjuryPenalty;
-			auto stamToSerialize = Injuries::DeathInjury::currentStamRatePen;
-			auto magToSerialize = Injuries::DeathInjury::currentMagRatePen;
-			auto boolToSave = Injuries::DeathInjury::injury_active;
-			auto stressBoolToSave = Injuries::DeathInjury::can_apply_stress;
-			auto numInjuries = Injuries::DeathInjury::injuryCount;
+			auto injManager = Injuries::DeathInjury::GetSingleton();
+			auto penToSerialize = injManager->currentInjuryPenalty;
+			auto stamToSerialize = injManager->currentStamRatePen;
+			auto magToSerialize = injManager->currentMagRatePen;
+			auto boolToSave = injManager->injury_active;
+			auto stressBoolToSave = injManager->can_apply_stress;
+			auto numInjuries = injManager->injuryCount;
 
 			if (!a_skse->WriteRecordData(penToSerialize))
 			{
@@ -129,12 +130,13 @@ namespace Serialisation
 		}
 		else
 		{
-			Injuries::DeathInjury::currentInjuryPenalty = deserializedVal;
-			Injuries::DeathInjury::currentStamRatePen = deserializedStamR;
-			Injuries::DeathInjury::currentMagRatePen = deserializedMagR;
-			Injuries::DeathInjury::injury_active = deserializedBool;
-			Injuries::DeathInjury::can_apply_stress = deserializedStressBool;
-			Injuries::DeathInjury::injuryCount = deserializedInjuryCount;
+			auto injManager = Injuries::DeathInjury::GetSingleton();
+			injManager->currentInjuryPenalty = deserializedVal;
+			injManager->currentStamRatePen = deserializedStamR;
+			injManager->currentMagRatePen = deserializedMagR;
+			injManager->injury_active = deserializedBool;
+			injManager->can_apply_stress = deserializedStressBool;
+			injManager->injuryCount = deserializedInjuryCount;
 
 			logs::info("Deserialized Health Penalty: {}", deserializedVal);
 			logs::info("Deserialized Stamina Rate Penalty: {}", deserializedStamR);
@@ -147,11 +149,12 @@ namespace Serialisation
 
 	inline void RevertCallback([[maybe_unused]] SKSE::SerializationInterface *a_skse)
 	{
-		Injuries::DeathInjury::currentInjuryPenalty = 0.0f;
-		Injuries::DeathInjury::currentInjuryPenalty = 0.0f;
-		Injuries::DeathInjury::currentStamRatePen = 0.0f;
-		Injuries::DeathInjury::injury_active = false;
-		Injuries::DeathInjury::injury_active = false;
-		Injuries::DeathInjury::injuryCount = 0;
+		auto injManager = Injuries::DeathInjury::GetSingleton();
+		injManager->currentInjuryPenalty = 0.0f;
+		injManager->currentInjuryPenalty = 0.0f;
+		injManager->currentStamRatePen = 0.0f;
+		injManager->injury_active = false;
+		injManager->can_apply_stress = true;
+		injManager->injuryCount = 0;
 	}
 }

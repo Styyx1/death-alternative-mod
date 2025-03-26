@@ -70,5 +70,5 @@ void StressHandler::StressApplication::IncreaseStressWithoutInjury(float a_amoun
 			Settings::stress_total_value->value = 0.0f;
 		}		
 	}
-	return;
+	logs::info("stress is now {}", Settings::stress_total_value->value);
 }
