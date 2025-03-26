@@ -22,7 +22,6 @@ namespace Serialisation
 			auto stamToSerialize = injManager->currentStamRatePen;
 			auto magToSerialize = injManager->currentMagRatePen;
 			auto boolToSave = injManager->injury_active;
-			auto stressBoolToSave = injManager->can_apply_stress;
 			auto numInjuries = injManager->injuryCount;
 
 			if (!a_skse->WriteRecordData(penToSerialize))
@@ -48,24 +47,10 @@ namespace Serialisation
 				logs::error("Failed to write size of record data");
 				return;
 			}
-			if (!a_skse->WriteRecordData(stressBoolToSave))
-			{
-				logs::error("Failed to write size of record data");
-				return;
-			}
 			if (!a_skse->WriteRecordData(numInjuries))
 			{
 				logs::error("Failed to write size of record data");
 				return;
-			}
-			else
-			{
-				logs::info("Serialized Health Penalty: {}", penToSerialize);
-				logs::info("Serialized Stamina Rate Penalty: {}", stamToSerialize);
-				logs::info("Serialized Magicka Rate Penalty: {}", magToSerialize);
-				logs::info("Serialized Injury Active: {}", boolToSave ? "true" : "false");
-				logs::info("Serialized Can Apply Stress: {}", stressBoolToSave ? "true" : "false");
-				logs::info("Serialized Injury Count: {}", numInjuries);
 			}
 		}
 	}
@@ -118,11 +103,6 @@ namespace Serialisation
 			logs::error("Failed to load size");
 			return;
 		}
-		if (!a_skse->ReadRecordData(deserializedStressBool))
-		{
-			logs::error("Failed to load size");
-			return;
-		}
 		if (!a_skse->ReadRecordData(deserializedInjuryCount))
 		{
 			logs::error("Failed to load size");
@@ -135,15 +115,7 @@ namespace Serialisation
 			injManager->currentStamRatePen = deserializedStamR;
 			injManager->currentMagRatePen = deserializedMagR;
 			injManager->injury_active = deserializedBool;
-			injManager->can_apply_stress = deserializedStressBool;
 			injManager->injuryCount = deserializedInjuryCount;
-
-			logs::info("Deserialized Health Penalty: {}", deserializedVal);
-			logs::info("Deserialized Stamina Rate Penalty: {}", deserializedStamR);
-			logs::info("Deserialized Magicka Rate Penalty: {}", deserializedMagR);
-			logs::info("Deserialized Injury Active: {}", deserializedBool ? "true" : "false");
-			logs::info("Deserialized Can Apply Stress: {}", deserializedStressBool ? "true" : "false");
-			logs::info("Deserialized Injury Count: {}", deserializedInjuryCount);
 		}
 	}
 
@@ -154,7 +126,6 @@ namespace Serialisation
 		injManager->currentInjuryPenalty = 0.0f;
 		injManager->currentStamRatePen = 0.0f;
 		injManager->injury_active = false;
-		injManager->can_apply_stress = true;
 		injManager->injuryCount = 0;
 	}
 }

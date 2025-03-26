@@ -97,11 +97,10 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float pena
 
 			a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
 		}
-		can_apply_stress = true;
-		ApplyStressToDeath();
 		return;
 	}
-	else {
+	else
+	{
 		return;
 	}
 }
@@ -114,7 +113,6 @@ void Injuries::DeathInjury::RemoveAttributePenalty(RE::Actor *a_actor)
 	float currMagPenalty = currentMagRatePen;
 	float currentStamPenalty = currentStamRatePen;
 	injury_active = false;
-	HealStressFromDeath();
 	if (currentPenaltyHealthMag > 0)
 	{
 		currentInjuryPenalty = 0.0f;
@@ -190,12 +188,7 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, 50.0f);
 
 		DeathEffects::Ethereal::SetEthereal(player);
-		StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);
 
-		if (Settings::remove_gold)
-		{
-			DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
-		}
 		CheckInjuryAvPenalty(player);
 		hasDiedThisCycle = false;
 		processing = false;

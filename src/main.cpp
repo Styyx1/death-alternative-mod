@@ -50,11 +50,11 @@ class ResurrectionManager : public ResurrectionAPI
 
         if (a == player)
         {
-            return get_res_cond(player);
+            return true;
         }
         else
         {
-            return DeathEffects::Ethereal::get_count(a, Settings::cheat_death_token) && Settings::enable_npcs;
+            return false;
         }
     }
 
