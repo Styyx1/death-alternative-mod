@@ -28,7 +28,6 @@ public:
 	inline static float injury_stam_decrease{ 0.40f };
 	inline static float injury_mag_decrease{ 0.40f };
 
-	inline static bool debug_logging{false};
 	//int
 	inline static std::uint32_t number_of_injuries{3};
 	inline static std::uint32_t sleep_location_difficulty{ 1 };

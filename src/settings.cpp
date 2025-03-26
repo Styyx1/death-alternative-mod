@@ -30,8 +30,6 @@ void Settings::LoadSettings()
 	stress_increase_text = ini.GetValue("Texts", "sStressIncreaseText", "I hope this ends well...");
 	stress_decrease_text = ini.GetValue("Texts", "sInjuryHealStressText", "I feel a bit more relaxed now!");
 
-	debug_logging = ini.GetBoolValue("Logging", "bEnableDebug", false);
-
 	// calculations after getting the settings
 	std::uint32_t inj_cap = 100;
 	number_of_injuries = std::min(number_of_injuries, inj_cap);
@@ -70,7 +68,7 @@ void Settings::LoadForms()
 	injury_display_effect = dh->LookupForm<RE::EffectSetting>(inj_display_formID, mod_name);
 	cheat_death_token = dh->LookupForm(cheat_death_token_form, mod_name)->As<RE::TESObjectMISC>();
 
-	//apostasy stuff:
+	// apostasy stuff:
 	gold_tax_global = dh->LookupForm<RE::TESGlobal>(gold_tax_global_ID, mod_name);
 	temp_injury_spell = dh->LookupForm<RE::SpellItem>(dummy_temp_injury_ID, mod_name);
 	lady_stone_perk = dh->LookupForm<RE::BGSPerk>(dummy_perk_lady_ID, mod_name);

@@ -13,7 +13,6 @@ void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor *a_actor)
 		auto player = RE::PlayerCharacter::GetSingleton();
 		if (!injury_active)
 		{
-			logs::info("injury is not active");
 			ApplyAttributePenalty(a_actor, Settings::injury_health_decrease, Settings::injury_stam_decrease, Settings::injury_mag_decrease);
 			injuryCount++;
 		}
@@ -225,7 +224,6 @@ bool Injuries::DeathInjury::CheckLadyStoneGold(RE::PlayerCharacter *player)
 		RE::TESForm *const gold = RE::BGSDefaultObjectManager::GetSingleton()->GetObject(RE::DEFAULT_OBJECT::kGold);
 		if (player->GetItemCount(gold->As<RE::TESBoundObject>()) >= Settings::gold_tax_global->value)
 		{
-			logs::info("player has tax money, will return to use gold instead of injury");
 			player->RemoveItem(gold->As<RE::TESBoundObject>(), Settings::gold_tax_global->value, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr, nullptr);
 			player->RemoveSpell(Settings::injury_spell);
 			return false;

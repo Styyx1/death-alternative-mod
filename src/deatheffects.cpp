@@ -46,7 +46,6 @@ void DeathEffects::Ethereal::RemoveGoldPlayer(RE::PlayerCharacter *player, float
 		{
 			RE::DebugNotification(std::format("{} {} removed", amount, gold->GetName()).c_str());
 		}
-		logs::debug("removed {} pieces of {}", amount, gold->As<RE::TESBoundObject>()->GetName());
 	}
 	return;
 }

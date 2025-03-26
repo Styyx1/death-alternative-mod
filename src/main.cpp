@@ -67,8 +67,6 @@ class ResurrectionManager : public ResurrectionAPI
         RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
         if (a == player)
         {
-            debugCounter++;
-            logs::info("player died for the {}th time" , debugCounter);
             auto injManager = Injuries::DeathInjury::GetSingleton();
             injManager->HandlePlayerResurrection(player);
             return;
