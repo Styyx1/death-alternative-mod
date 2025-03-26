@@ -49,13 +49,17 @@ void Settings::LoadForms()
 	const int ethereal_npc_form = 0x80c;
 	const int calm_spell_formID = 0x810;
 	const int inj_display_formID = 0x804;
-
+	// Stress and fear integration:
+	const char *stress_mod = "Stress and Fear.esp";
+	const int stress_total_form = 0x801;
+	const int stress_enabled_form = 0x8a5;
 	// apostasy related:
 	const int dummy_perk_lady_ID = 0x812;
 	const int dummy_temp_injury_ID = 0x814;
 	const int gold_tax_global_ID = 0x815;
-
 	const char *mod_name = "shade-of-mortality.esp";
+
+
 	// Loading the forms needed for the mod from its esp
 	logs::info("loading forms...");
 	RE::TESDataHandler *dh = RE::TESDataHandler::GetSingleton();
@@ -68,15 +72,6 @@ void Settings::LoadForms()
 	injury_display_effect = dh->LookupForm<RE::EffectSetting>(inj_display_formID, mod_name);
 	cheat_death_token = dh->LookupForm(cheat_death_token_form, mod_name)->As<RE::TESObjectMISC>();
 
-	// apostasy stuff:
-	gold_tax_global = dh->LookupForm<RE::TESGlobal>(gold_tax_global_ID, mod_name);
-	temp_injury_spell = dh->LookupForm<RE::SpellItem>(dummy_temp_injury_ID, mod_name);
-	lady_stone_perk = dh->LookupForm<RE::BGSPerk>(dummy_perk_lady_ID, mod_name);
-
-	// Stress and fear integration:
-	const char *stress_mod = "Stress and Fear.esp";
-	const int stress_total_form = 0x801;
-	const int stress_enabled_form = 0x8a5;
 	is_stress_mod_active = false;
 	if (auto file = dh->LookupModByName(stress_mod); file && file->compileIndex != 0xFF)
 	{
@@ -85,6 +80,12 @@ void Settings::LoadForms()
 		stress_total_value = dh->LookupForm(stress_enabled_form, stress_mod)->As<RE::TESGlobal>();
 		is_stress_mod_active = true;
 	}
+
+
+	gold_tax_global = dh->LookupForm<RE::TESGlobal>(gold_tax_global_ID, mod_name);
+	temp_injury_spell = dh->LookupForm<RE::SpellItem>(dummy_temp_injury_ID, mod_name);
+	lady_stone_perk = dh->LookupForm<RE::BGSPerk>(dummy_perk_lady_ID, mod_name);
+
 	// Base Game global for injury UI changes
 	health_penalty_ui_global = dh->LookupForm(0x2EDE, "Update.esm")->As<RE::TESGlobal>();
 

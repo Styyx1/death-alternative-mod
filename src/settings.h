@@ -52,6 +52,7 @@ public:
 	inline static RE::EffectSetting* injury_display_effect;
 
 	//apostasy specific stuff
+
  	inline static RE::TESGlobal* gold_tax_global;
  	inline static RE::SpellItem* temp_injury_spell;
  	inline static RE::BGSPerk* lady_stone_perk;

@@ -8,40 +8,6 @@
 #include "effectEvent.h"
 #include "stresshandler.h"
 
-#undef GetObject
-
-bool resurrect_only_with_gold(RE::PlayerCharacter *player)
-{
-    RE::TESForm *const gold = RE::BGSDefaultObjectManager::GetSingleton()->GetObject(RE::DEFAULT_OBJECT::kGold);
-    if (Settings::kill_without_gold)
-    {
-        if (player->GetItemCount(gold->As<RE::TESBoundObject>()) > 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool get_res_cond(RE::PlayerCharacter *player)
-{
-
-    bool should_res = true;
-    auto injManager = Injuries::DeathInjury::GetSingleton();
-    if (Settings::number_of_injuries > 0)
-    {
-        if (injManager->injuryCount > Settings::number_of_injuries)
-        {
-            should_res = false;
-        }
-    }
-    return should_res && resurrect_only_with_gold(player);
-}
-
 class ResurrectionManager : public ResurrectionAPI
 {
     bool should_resurrect(RE::Actor *a) const override
@@ -50,7 +16,7 @@ class ResurrectionManager : public ResurrectionAPI
 
         if (a == player)
         {
-            return get_res_cond(player);
+            return true;
         }
         else
         {
@@ -73,7 +39,7 @@ class ResurrectionManager : public ResurrectionAPI
         }
         else
         {
-            DeathEffects::Ethereal::ProcessNPCDeath(a);
+            //DeathEffects::Ethereal::ProcessNPCDeath(a);
             return;
         }
         return;

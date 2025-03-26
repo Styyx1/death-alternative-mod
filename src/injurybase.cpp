@@ -183,6 +183,7 @@ void Injuries::DeathInjury::HealStressFromDeath()
 void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player)
 {
 	counter++;
+	logs::info("counter is {}", counter);
 	if (counter == 1)
 	{
 		Utility::Spells::ApplySpell(player, player, Settings::injury_spell);
@@ -197,11 +198,12 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 			DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
 		}
 		CheckInjuryAvPenalty(player);
+		
 		hasDiedThisCycle = false;
 		processing = false;
 		std::jthread([=]
 					 {
-			std::this_thread::sleep_for(50ms);
+			std::this_thread::sleep_for(3s);
 				counter = 0; })
 			.detach();
 		return;
@@ -210,7 +212,7 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 	{
 		std::jthread([=]
 					 {
-			std::this_thread::sleep_for(50ms);
+			std::this_thread::sleep_for(3s);
 			counter = 0; })
 			.detach();
 		return;
