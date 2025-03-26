@@ -189,6 +189,7 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 		{
 			DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
 		}
+<<<<<<< Updated upstream
 		if (player->HasPerk(Settings::lady_stone_perk))
 		{
 #undef GetObject
@@ -207,6 +208,10 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 			CheckInjuryAvPenalty(player);
 		}
 		logs::info("check death");
+=======
+		CheckInjuryAvPenalty(player);
+		
+>>>>>>> Stashed changes
 		hasDiedThisCycle = false;
 		processing = false;
 		std::jthread([=]
@@ -226,3 +231,21 @@ void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player
 		return;
 	}
 }
+<<<<<<< Updated upstream
+=======
+#undef GetObject
+bool Injuries::DeathInjury::CheckLadyStoneGold(RE::PlayerCharacter *player)
+{
+	if (player->HasPerk(Settings::lady_stone_perk))
+	{
+		RE::TESForm *const gold = RE::BGSDefaultObjectManager::GetSingleton()->GetObject(RE::DEFAULT_OBJECT::kGold);
+		if (player->GetItemCount(gold->As<RE::TESBoundObject>()) >= Settings::gold_tax_global->value)
+		{
+			player->RemoveItem(gold->As<RE::TESBoundObject>(), Settings::gold_tax_global->value, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr, nullptr);
+			player->RemoveSpell(Settings::injury_spell);
+			return false;
+		}
+	}
+	return true;
+}
+>>>>>>> Stashed changes

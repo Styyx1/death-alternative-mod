@@ -8,6 +8,7 @@
 #include "effectEvent.h"
 #include "stresshandler.h"
 
+<<<<<<< Updated upstream
 #undef GetObject
 
 bool resurrect_only_with_gold(RE::PlayerCharacter *player)
@@ -41,6 +42,8 @@ bool get_res_cond(RE::PlayerCharacter *player)
     return should_res && resurrect_only_with_gold(player);
 }
 
+=======
+>>>>>>> Stashed changes
 class ResurrectionManager : public ResurrectionAPI
 {
     bool should_resurrect(RE::Actor *a) const override
@@ -49,7 +52,7 @@ class ResurrectionManager : public ResurrectionAPI
 
         if (a == player)
         {
-            return get_res_cond(player);
+            return true;
         }
         else
         {
@@ -65,12 +68,17 @@ class ResurrectionManager : public ResurrectionAPI
         RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
         if (a == player)
         {
+<<<<<<< Updated upstream
             Injuries::DeathInjury::HandlePlayerResurrection(player);
+=======
+            auto injManager = Injuries::DeathInjury::GetSingleton();
+            injManager->HandlePlayerResurrection(player);
+>>>>>>> Stashed changes
             return;
         }
         else
         {
-            DeathEffects::Ethereal::ProcessNPCDeath(a);
+            //DeathEffects::Ethereal::ProcessNPCDeath(a);
             return;
         }
         return;
