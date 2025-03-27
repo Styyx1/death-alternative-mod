@@ -42,6 +42,7 @@ void StressHandler::StressApplication::ReduceStress()
 
 void StressHandler::StressApplication::ShowStressMessage(std::string a_text)
 {
+
 	RE::DebugNotification(a_text.c_str(), nullptr, true);
 }
 
@@ -77,6 +78,6 @@ void StressHandler::StressApplication::IncreaseStressWithoutInjury(float a_amoun
 		{
 			Settings::stress_total_value->value = 0.0f;
 		}
+		// logs::info("stress is now {}", Settings::stress_total_value->value);
 	}
-	return;
 }
