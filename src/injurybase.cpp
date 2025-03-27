@@ -124,7 +124,7 @@ void Injuries::DeathInjury::RemoveAttributePenalty(RE::Actor *a_actor)
 	if (currMagPenalty > 0)
 	{
 		currentMagRatePen = 0.0f;
-		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, currentPenaltyHealthMag);
+		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, currMagPenalty);
 	}
 	if (currentStamPenalty > 0)
 	{
