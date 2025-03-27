@@ -70,7 +70,7 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float pena
 			float maxStamPenAv = GetMaxStaminaRate(a_actor);
 			float lastPenaltyStamRate = currentStamRatePen;
 			float stamRModi = penalty_stam / 100;
-			float newStamRateMag = std::roundf(maxStamPenAv * stamRModi);
+			float newStamRateMag = maxStamPenAv * stamRModi;
 			if (newStamRateMag > maxStamPenAv)
 			{
 				newStamRateMag = maxStamPenAv;
@@ -87,7 +87,7 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float pena
 			float maxmagickPenAv = GetMaxMagickaRate(a_actor);
 			float lastPenaltymagickRate = currentMagRatePen;
 			float magickRModi = penalty_mag / 100;
-			float newmagickRateMag = std::roundf(maxmagickPenAv * magickRModi);
+			float newmagickRateMag = maxmagickPenAv * magickRModi;
 			if (newmagickRateMag > maxmagickPenAv)
 			{
 				newmagickRateMag = maxmagickPenAv;
@@ -95,7 +95,8 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float pena
 			auto magickRateMagDelta = lastPenaltymagickRate - newmagickRateMag;
 			currentMagRatePen = newmagickRateMag;
 
-			a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
+				a_actor->AsActorValueOwner()
+					->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
 		}
 		can_apply_stress = true;
 		ApplyStressToDeath();
