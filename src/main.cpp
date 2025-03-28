@@ -51,7 +51,7 @@ class ResurrectionManager : public ResurrectionAPI
 
         if (a == player)
         {
-            return true;
+            return get_res_cond(player);
         }
         else
         {

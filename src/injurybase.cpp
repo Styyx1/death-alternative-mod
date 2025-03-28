@@ -14,12 +14,10 @@ void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor *a_actor)
 {
 	if (Utility::Spells::HasSpell(a_actor, Settings::injury_spell))
 	{
-		logs::info("apply penalty");
 		ApplyAttributePenalty(a_actor, Settings::injury_health_decrease, Settings::injury_stam_decrease, Settings::injury_mag_decrease);
 	}
 	else
 	{
-		logs::info("remove Penalty");
 		RemoveAttributePenalty(a_actor);
 	}
 }
@@ -85,11 +83,6 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float pena
 			a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
 		}
 	}
-	else
-	{
-		logs::info("injury already active");
-	}
-	injury_active = true;
 }
 
 void Injuries::DeathInjury::RemoveAttributePenalty(RE::Actor *a_actor)

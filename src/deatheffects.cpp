@@ -2,6 +2,7 @@
 #include "utility.h"
 #include "settings.h"
 #include "injurybase.h"
+#include "stresshandler.h"
 
 #undef GetObject
 // name is misleading. casts healing spell, casts ethereal spell, all enemies around the player stop combat.
@@ -11,38 +12,38 @@ void DeathEffects::Ethereal::SetEthereal(RE::Actor *a_actor)
 	{
 		Utility::Spells::ApplySpell(a_actor, a_actor, Settings::death_heal);
 		Utility::Spells::ApplySpell(a_actor, a_actor, Settings::ethereal_spell);
-		logs::info("applied heal and ethereal spell");
 		auto injManager = Injuries::DeathInjury::GetSingleton();
 		for (auto actor : Utility::Actors::GetNearbyActors(a_actor, 500.0f, false))
 		{
 			if (Settings::heal_enemies_on_death && actor->IsHostileToActor(a_actor))
 			{
 				Utility::Spells::ApplySpell(actor, actor, Settings::death_heal);
-				logs::info("applied {} to {}", Settings::death_heal->GetName(), actor->GetName());
 				if (actor != a_actor)
 				{
 					Utility::Spells::ApplySpell(actor, actor, Settings::calm_spell_npcs);
-					logs::info("applied {} to {}", Settings::calm_spell_npcs->GetName(), actor->GetName());
 				}
 			}
 		}
 		auto player = Cache::GetPlayerSingleton();
 		if (!Utility::Spells::ActorHasActiveMagicEffect(a_actor, Settings::injury_display_effect))
 		{
-			logs::info("doesn't have injury effect");
 			if (injManager->CheckLadyStoneGold(player))
 			{
-				logs::info("negative lady stone check. gonna apply spells");
 				Utility::Spells::ApplySpell(player, player, Settings::injury_spell);
+				injManager->can_apply_stress = true;
+				injManager->ApplyStressToDeath();
 			}
 		}
+		else
+		{
+			StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);
+		}
+
 		if (Settings::remove_gold)
 		{
 			RemoveGoldPlayer(player, Settings::gold_remove_percentage);
 		}
-
-		injManager->can_apply_stress = true;
-		injManager->ApplyStressToDeath();
+		injManager->injuryCount++;
 	}
 }
 
