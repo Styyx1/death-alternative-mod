@@ -5,47 +5,38 @@ float Injuries::DeathInjury::GetMaxActorValue(RE::Actor *a_actor, RE::ActorValue
 {
 	return a_actor->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, a_av) + a_actor->AsActorValueOwner()->GetPermanentActorValue(a_av);
 }
+const bool Injuries::DeathInjury::IsInjuryActive() const
+{
+	return injury_active;
+}
 // main function to call, leads to the other necessary functions
 void Injuries::DeathInjury::CheckInjuryAvPenalty(RE::Actor *a_actor)
 {
-	if (a_actor->HasSpell(Settings::injury_spell))
+	if (Utility::Spells::HasSpell(a_actor, Settings::injury_spell))
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
-		if (!injury_active)
-		{
-			ApplyAttributePenalty(a_actor, Settings::injury_health_decrease, Settings::injury_stam_decrease, Settings::injury_mag_decrease);
-			injuryCount++;
-		}
-		else if (!hasDiedThisCycle)
-		{
-			Utility::Spells::ApplySpell(a_actor, a_actor, Settings::temp_injury_spell);
-			injuryCount++;
-			hasDiedThisCycle = true;
-		}
-		return;
+		logs::info("apply penalty");
+		ApplyAttributePenalty(a_actor, Settings::injury_health_decrease, Settings::injury_stam_decrease, Settings::injury_mag_decrease);
 	}
 	else
 	{
+		logs::info("remove Penalty");
 		RemoveAttributePenalty(a_actor);
-		hasDiedThisCycle = false;
 	}
-	return;
 }
 
 void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float penalty_health, float penalty_stam, float penalty_mag)
 {
-	injury_active = true;
 	RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
 
-	if (CheckLadyStoneGold(player))
+	if (!IsInjuryActive())
 	{
-		// Heal rate:
+		injury_active = true;
 		if (Settings::use_health_injury)
 		{
 			float maxPenAv = GetMaxHealthAv(a_actor);
 			float lastPenaltyMag = currentInjuryPenalty;
 			float modifier = penalty_health / 100;
-			float newPenaltyMag = std::roundf(maxPenAv * modifier);
+			float newPenaltyMag = maxPenAv * modifier;
 
 			if (newPenaltyMag > maxPenAv)
 			{
@@ -53,15 +44,11 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float pena
 			}
 
 			auto magDelta = lastPenaltyMag - newPenaltyMag;
-			currentInjuryPenalty = newPenaltyMag; // Set tracker av not actual damage
 
-			// wait 0.5 second to reduce health cause it does not regenerate fast enough otherwise and kills you again. RestoreActorValue does not work for me for some reason so i had to use a spell instead.
-			std::jthread([=]
-						 {
-							 std::this_thread::sleep_for(0.5s);
-							 player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta); // Damage or restore AV
-						 })
-				.detach();
+			// Set tracker av not actual damage
+			currentInjuryPenalty = newPenaltyMag;
+
+			player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealRate, magDelta); // Damage or restore AV
 		}
 
 		// Stamina rate:
@@ -95,39 +82,35 @@ void Injuries::DeathInjury::ApplyAttributePenalty(RE::Actor *a_actor, float pena
 			auto magickRateMagDelta = lastPenaltymagickRate - newmagickRateMag;
 			currentMagRatePen = newmagickRateMag;
 
-				a_actor->AsActorValueOwner()
-					->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
+			a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, magickRateMagDelta);
 		}
-		can_apply_stress = true;
-		ApplyStressToDeath();
-		return;
 	}
-	else {
-		return;
+	else
+	{
+		logs::info("injury already active");
 	}
+	injury_active = true;
 }
-
-int counter = 0;
 
 void Injuries::DeathInjury::RemoveAttributePenalty(RE::Actor *a_actor)
 {
 	float currentPenaltyHealthMag = currentInjuryPenalty;
 	float currMagPenalty = currentMagRatePen;
+
 	float currentStamPenalty = currentStamRatePen;
 	injury_active = false;
 	HealStressFromDeath();
 	if (currentPenaltyHealthMag > 0)
 	{
 		currentInjuryPenalty = 0.0f;
-		SetAttributePenaltyUIGlobal(0.0f);
-		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, currentPenaltyHealthMag);
+		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealRate, currentPenaltyHealthMag);
 	}
-	if (currMagPenalty > 0)
+	if (currMagPenalty > 0.0f)
 	{
 		currentMagRatePen = 0.0f;
 		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagickaRate, currMagPenalty);
 	}
-	if (currentStamPenalty > 0)
+	if (currentStamPenalty > 0.0f)
 	{
 		currentStamRatePen = 0.0f;
 		a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kStaminaRate, currentStamPenalty);
@@ -148,7 +131,7 @@ void Injuries::DeathInjury::RemoveAllExistingInjurySpells(RE::Actor *a)
 
 float Injuries::DeathInjury::GetMaxHealthAv(RE::Actor *a_actor)
 {
-	return GetMaxActorValue(a_actor, RE::ActorValue::kHealth) + currentInjuryPenalty;
+	return GetMaxActorValue(a_actor, RE::ActorValue::kHealRate) + currentInjuryPenalty;
 }
 
 float Injuries::DeathInjury::GetMaxStaminaRate(RE::Actor *a_actor)
@@ -181,42 +164,6 @@ void Injuries::DeathInjury::HealStressFromDeath()
 	}
 }
 
-void Injuries::DeathInjury::HandlePlayerResurrection(RE::PlayerCharacter *player)
-{
-	counter++;
-	if (counter == 1)
-	{
-		Utility::Spells::ApplySpell(player, player, Settings::injury_spell);
-
-		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, 50.0f);
-
-		DeathEffects::Ethereal::SetEthereal(player);
-		StressHandler::StressApplication::IncreaseStressWithoutInjury(Settings::stress_increase_value);
-
-		if (Settings::remove_gold)
-		{
-			DeathEffects::Ethereal::RemoveGoldPlayer(player, Settings::gold_remove_percentage);
-		}
-		CheckInjuryAvPenalty(player);
-		hasDiedThisCycle = false;
-		processing = false;
-		std::jthread([=]
-					 {
-			std::this_thread::sleep_for(50ms);
-				counter = 0; })
-			.detach();
-		return;
-	}
-	else
-	{
-		std::jthread([=]
-					 {
-			std::this_thread::sleep_for(50ms);
-			counter = 0; })
-			.detach();
-		return;
-	}
-}
 #undef GetObject
 bool Injuries::DeathInjury::CheckLadyStoneGold(RE::PlayerCharacter *player)
 {

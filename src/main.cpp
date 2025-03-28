@@ -7,6 +7,7 @@
 #include "hooks.h"
 #include "effectEvent.h"
 #include "stresshandler.h"
+#include "cache.h"
 
 #undef GetObject
 
@@ -46,15 +47,15 @@ class ResurrectionManager : public ResurrectionAPI
 {
     bool should_resurrect(RE::Actor *a) const override
     {
-        RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
+        RE::PlayerCharacter *player = Cache::GetPlayerSingleton();
 
         if (a == player)
         {
-            return get_res_cond(player);
+            return true;
         }
         else
         {
-            return DeathEffects::Ethereal::get_count(a, Settings::cheat_death_token) && Settings::enable_npcs;
+            return false;
         }
     }
 
@@ -67,9 +68,7 @@ class ResurrectionManager : public ResurrectionAPI
         RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
         if (a == player)
         {
-            auto injManager = Injuries::DeathInjury::GetSingleton();
-            injManager->HandlePlayerResurrection(player);
-            return;
+            DeathEffects::Ethereal::SetEthereal(player);
         }
         else
         {
@@ -113,6 +112,7 @@ void InitListener(SKSE::MessagingInterface::Message *a_msg)
 SKSEPluginLoad(const SKSE::LoadInterface *a_skse)
 {
     SKSE::Init(a_skse);
+    Cache::CacheAddLibAddresses();
     SKSE::GetMessagingInterface()->RegisterListener(InitListener);
     SKSE::AllocTrampoline(14 * 2);
     if (auto serialization = SKSE::GetSerializationInterface())

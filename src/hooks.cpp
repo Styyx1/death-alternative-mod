@@ -1,5 +1,7 @@
 #include "hooks.h"
 
+static float lastTime;
+
 void Hooks::InstallHooks()
 {
 	Hooks::PlayerPotionUsed::Install();
@@ -21,7 +23,6 @@ void Hooks::PlayerPotionUsed::PlayerUsePotion(uint64_t self, RE::AlchemyItem *al
 	{
 		auto injManager = Injuries::DeathInjury::GetSingleton();
 		RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
-		injManager->RemoveAttributePenalty(player);
 		injManager->RemoveAllExistingInjurySpells(player);
 		injManager->HealStressFromDeath();
 	}
@@ -30,17 +31,28 @@ void Hooks::PlayerPotionUsed::PlayerUsePotion(uint64_t self, RE::AlchemyItem *al
 
 void Hooks::PlayerUpdate::Install()
 {
-	REL::Relocation<std::uintptr_t> PlayerVTBL{RE::VTABLE_PlayerCharacter[0]};
-	_func = PlayerVTBL.write_vfunc(0xAD, PlayerUpdateHook);
+	auto &trampoline = SKSE::GetTrampoline();
+	_func = trampoline.write_call<5>(OnFrame_Update_Hook.address(), PlayerUpdateHook);
 	logs::info("Installed <{}>", typeid(PlayerUpdate).name());
 }
 
-void Hooks::PlayerUpdate::PlayerUpdateHook(RE::PlayerCharacter *a_this, float a_delta)
+void Hooks::PlayerUpdate::PlayerUpdateHook(std::int64_t a1)
 {
-	auto injManager = Injuries::DeathInjury::GetSingleton();
-	if (injManager->injury_active && injManager->currentInjuryPenalty != 0 && Settings::use_health_injury)
+
+	if (!Cache::GetUISingleton()->GameIsPaused())
 	{
-		injManager->SetAttributePenaltyUIGlobal(Settings::injury_health_decrease / 100);
+
+		if (Cache::g_deltaTime > 0)
+		{
+			lastTime += Cache::g_deltaTime;
+			if (lastTime >= 0.5f)
+			{
+				RE::PlayerCharacter *player = Cache::GetPlayerSingleton();
+				auto inj = Injuries::DeathInjury::GetSingleton();
+				inj->CheckInjuryAvPenalty(player);
+				lastTime = 0;
+			}
+		}
 	}
-	_func(a_this, a_delta);
+	return _func(a1);
 }

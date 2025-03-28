@@ -1,6 +1,7 @@
 #pragma once
 
 #include "settings.h"
+#include "cache.h"
 
 namespace Utility
 {
@@ -47,7 +48,17 @@ namespace Utility
     //Credits: https://github.com/colinswrath/BladeAndBlunt/blob/main/include/Conditions.h
 	struct Spells
 	{
-        
+
+        // https://github.com/colinswrath/BladeAndBlunt/blob/main/include/Conditions.h
+        static bool HasSpell(RE::Actor *actor, RE::SpellItem *spell)
+        {
+            using func_t = decltype(&Utility::Spells::HasSpell);
+
+            REL::Relocation<func_t> func{Cache::HasSpellAddress};
+
+            return func(actor, spell);
+        }
+        inline static REL::Relocation<decltype(HasSpell)> _HasSpell;
 
         inline static bool ActorHasActiveMagicEffect(RE::Actor* a_actor, RE::EffectSetting* a_effect)
         {

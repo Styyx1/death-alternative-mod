@@ -49,6 +49,7 @@ void Settings::LoadForms()
 	const int ethereal_npc_form = 0x80c;
 	const int calm_spell_formID = 0x810;
 	const int inj_display_formID = 0x804;
+	const int ethereal_effect_form = 0x800;
 
 	// apostasy related:
 	const int dummy_perk_lady_ID = 0x812;
@@ -67,6 +68,7 @@ void Settings::LoadForms()
 	calm_spell_npcs = dh->LookupForm(calm_spell_formID, mod_name)->As<RE::SpellItem>();
 	injury_display_effect = dh->LookupForm<RE::EffectSetting>(inj_display_formID, mod_name);
 	cheat_death_token = dh->LookupForm(cheat_death_token_form, mod_name)->As<RE::TESObjectMISC>();
+	ethereal_effect = dh->LookupForm<RE::EffectSetting>(ethereal_effect_form, mod_name);
 
 	// apostasy stuff:
 	gold_tax_global = dh->LookupForm<RE::TESGlobal>(gold_tax_global_ID, mod_name);
