@@ -114,7 +114,7 @@ SKSEPluginLoad(const SKSE::LoadInterface *a_skse)
     SKSE::Init(a_skse);
     Cache::CacheAddLibAddresses();
     SKSE::GetMessagingInterface()->RegisterListener(InitListener);
-    SKSE::AllocTrampoline(14 * 2);
+    SKSE::AllocTrampoline(14 * 3);
     if (auto serialization = SKSE::GetSerializationInterface())
     {
         serialization->SetUniqueID(Serialisation::ID);

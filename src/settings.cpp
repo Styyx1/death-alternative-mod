@@ -83,8 +83,8 @@ void Settings::LoadForms()
 	if (auto file = dh->LookupModByName(stress_mod); file && file->compileIndex != 0xFF)
 	{
 		logs::info("Stress and Fear is active");
-		stress_enabled = dh->LookupForm(stress_total_form, stress_mod)->As<RE::TESGlobal>();
-		stress_total_value = dh->LookupForm(stress_enabled_form, stress_mod)->As<RE::TESGlobal>();
+		stress_enabled = dh->LookupForm(stress_enabled_form, stress_mod)->As<RE::TESGlobal>();
+		stress_total_value = dh->LookupForm(stress_total_form, stress_mod)->As<RE::TESGlobal>();
 		is_stress_mod_active = true;
 	}
 	// Base Game global for injury UI changes
@@ -127,13 +127,13 @@ void Settings::ChangeInjuryDescription()
 	std::string desc_text = "";
 	if (injury_health_decrease == injury_mag_decrease && injury_mag_decrease == injury_stam_decrease)
 	{
-		desc_text = std::format("Reduces Health, Stamina Regeneration and Magicka Regeneration by <{}%>", injury_health_decrease);
+		desc_text = std::format("Reduces Health Regeneration, Stamina Regeneration and Magicka Regeneration by <{}%>", injury_health_decrease);
 		Settings::injury_display_effect->magicItemDescription = desc_text.c_str();
 		return;
 	}
 	else
 	{
-		desc_text = std::format("Reduces Health by <{}%>, Stamina Regeneration by <{}%> and Magicka Regeneration by <{}%>", injury_health_decrease, injury_stam_decrease, injury_mag_decrease);
+		desc_text = std::format("Reduces Health Regeneration by <{}%>, Stamina Regeneration by <{}%> and Magicka Regeneration by <{}%>", injury_health_decrease, injury_stam_decrease, injury_mag_decrease);
 		Settings::injury_display_effect->magicItemDescription = desc_text.c_str();
 		return;
 	}

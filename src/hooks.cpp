@@ -31,6 +31,7 @@ void Hooks::PlayerPotionUsed::PlayerUsePotion(uint64_t self, RE::AlchemyItem *al
 
 void Hooks::PlayerUpdate::Install()
 {
+
 	auto &trampoline = SKSE::GetTrampoline();
 	_func = trampoline.write_call<5>(OnFrame_Update_Hook.address(), PlayerUpdateHook);
 	logs::info("Installed <{}>", typeid(PlayerUpdate).name());
