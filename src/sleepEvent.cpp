@@ -1,97 +1,73 @@
 #include "sleepEvent.h"
-#include "injurybase.h"
+#include "deatheffects.h"
+#include "settings.h"
+#include "cache.h"
+#include "utility.h"
 
-#define contEve return RE::BSEventNotifyControl::kContinue
 
-namespace SleepEvent
-{
-    SleepStopHandler *SleepStopHandler::GetSingleton()
+namespace SleepEv {
+    void InstallSleep()
     {
-        static SleepStopHandler singleton{};
-        return std::addressof(singleton);
+        SleepStartEvent::GetSingleton()->Install();
+        SleepStopEvent::GetSingleton()->Install();
+    }
+    void SleepStartEvent::Install()
+    {
+        if (RE::ScriptEventSourceHolder* const eventsrc = RE::ScriptEventSourceHolder::GetSingleton(); eventsrc) {
+            eventsrc->AddEventSink<RE::TESSleepStartEvent>(this);
+            REX::INFO("Registered <{}>", typeid(SleepStartEvent).name());
+        } 
     }
 
-    RE::BSEventNotifyControl SleepStopHandler::ProcessEvent(const RE::TESSleepStopEvent *a_event, RE::BSTEventSource<RE::TESSleepStopEvent> *a_eventSource) noexcept
-    {
-        if (!a_event)
-        {
-            contEve;
-        }
-        if (a_event->interrupted)
-        {
-            contEve;
-        }
-        ProcessSleepStop();
-        contEve;
+    void SleepStartEvent::ProcessSleepStart() {
+        sleep_hours = RE::Calendar::GetSingleton()->GetHoursPassed();
+        is_sleeping = true;
     }
 
-    void SleepStopHandler::RegisterSleepStop()
+    RES SleepStartEvent::ProcessEvent(const RE::TESSleepStartEvent* a_event, RE::BSTEventSource<RE::TESSleepStartEvent>*)
     {
-        auto *eventSink = SleepStopHandler::GetSingleton();
-
-        auto *eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-        eventSourceHolder->AddEventSink<RE::TESSleepStopEvent>(eventSink);
-
-        logs::info("Registered <{}>", typeid(SleepStopHandler).name());
-    }
-
-    SleepStartHandler *SleepStartHandler::GetSingleton()
-    {
-        static SleepStartHandler singleton{};
-        return std::addressof(singleton);
-    }
-
-    RE::BSEventNotifyControl SleepStartHandler::ProcessEvent(const RE::TESSleepStartEvent *a_event, RE::BSTEventSource<RE::TESSleepStartEvent> *a_eventSource) noexcept
-    {
-        if (!a_event)
-        {
-            contEve;
+        if (!a_event) {
+            return RES::kContinue;
         }
         ProcessSleepStart();
-
-        contEve;
+        return RES::kContinue;
     }
 
-    void SleepStartHandler::RegisterSleepStart()
-    {
-        auto *eventSink = SleepStartHandler::GetSingleton();
+    void SleepStopEvent::Install() {
 
-        auto *eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-        eventSourceHolder->AddEventSink<RE::TESSleepStartEvent>(eventSink);
-        logs::info("Registered <{}>", typeid(SleepStartHandler).name());
+        if (const auto eventsrc = RE::ScriptEventSourceHolder::GetSingleton(); eventsrc) {
+            eventsrc->AddEventSink<RE::TESSleepStopEvent>(this);
+            REX::INFO("Registered <{}>", typeid(RE::TESSleepStopEvent).name());
+        } 
     }
 
-    void InstallEvents()
-
-    {
-        SleepStopHandler::RegisterSleepStop();
-        SleepStartHandler::RegisterSleepStart();
-    }
-
-    void ProcessSleepStart()
-
-    {
-        hours = RE::Calendar::GetSingleton()->GetHoursPassed();
-        auto sleepCheck = SleepStopHandler::GetSingleton();
-        sleepCheck->is_sleeping = true;
-    }
-    void ProcessSleepStop()
-    {
-        hours = RE::Calendar::GetSingleton()->GetHoursPassed() - hours;
-        if (hours >= Settings::min_sleep_duration - 0.2)
+    void SleepStopEvent::ProcessSleepStop() {
+        sleep_hours = RE::Calendar::GetSingleton()->GetHoursPassed() - sleep_hours;
+        if (sleep_hours >= Config::Settings::min_sleep_duration - 0.2)
         {
-            RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
+            RE::PlayerCharacter* player = Cache::GetPlayerSingleton();
             if (Utility::Locations::IsSafePlace(player->GetParentCell()))
             {
-                auto injManager = Injuries::DeathInjury::GetSingleton();
-                injManager->DeathInjury::RemoveAllExistingInjurySpells(player);
-                injManager->DeathInjury::RemoveAttributePenalty(player);
-                logs::debug("player slept for more than {} hours", Settings::min_sleep_duration);
+
+                const auto injury_manager = OnDeath::Injuries::GetSingleton();
+                injury_manager->RemoveAllInjuries(player);
+                REX::DEBUG("player slept for more than {} hours", Config::Settings::min_sleep_duration);
             }
             else
             {
-                logs::debug("not a safe area, can't heal injury here");
+                REX::DEBUG("not a safe area, can't heal injury here");
             }
         }
+    }
+
+    RES SleepStopEvent::ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>*)
+    {
+        if(!a_event)
+            return RES::kContinue;
+        if(a_event->interrupted)
+            return RES::kContinue;
+
+        ProcessSleepStop();
+        return RES::kContinue;
     }
 }

@@ -2,11 +2,12 @@
 set_xmakever("2.8.2")
 
 -- includes
-includes("lib/commonlibsse-ng")
+includes("lib/commonlibsse")
+includes("extern/styyx-utils")
 
 -- set project
 set_project("shades-of-mortality")
-set_version("1.5.0")
+set_version("2.0.0")
 set_license("GPL-3.0")
 
 -- set defaults
@@ -21,25 +22,24 @@ add_rules("mode.debug", "mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
 set_defaultmode("releasedbg")
 
--- configs
-set_config("rex_ini", true)
+if is_mode("debug") then
+    add_defines("_BUILD_DEFAULT_CONFIG")
+end
 
--- packages
-add_requires("simpleini")
-add_requires("spdlog", { configs = { header_only = false } })
+-- configs
+set_config("commonlib_toml", true)
 
 -- extra files
-add_extrafiles("release/**.ini")
+add_extrafiles("release/**.toml")
 
 -- targets
 target("shades-of-mortality")
     -- add dependencies to target
-    add_deps("commonlibsse-ng")
-    add_packages("fmt", "spdlog", "simpleini")
-    add_options("rex_ini")
+    add_deps("commonlibsse")
+    add_deps("styyx-util")
 
-    -- add commonlibsse-ng plugin
-    add_rules("commonlibsse-ng.plugin", {
+    -- add commonlibsse plugin
+    add_rules("commonlibsse.plugin", {
         name = "shades-of-mortality",
         author = "styyx",
         description = "skse plugin that allows you to cheat death"
@@ -50,22 +50,3 @@ target("shades-of-mortality")
     add_headerfiles("src/**.h")
     add_includedirs("src")
     set_pcxxheader("src/pch.h")
-
-after_build(function(target)
-    local copy = function(env, ext)
-        for _, env in pairs(env:split(";")) do
-            if os.exists(env) then
-                local plugins = path.join(env, ext, "SKSE/Plugins")
-                os.mkdir(plugins)
-                os.trycp(target:targetfile(), plugins)
-                os.trycp(target:symbolfile(), plugins)
-                os.trycp("$(projectdir)/release/**.ini", plugins)
-            end
-        end
-    end
-    if os.getenv("XSE_TES5_MODS_PATH") then
-        copy(os.getenv("XSE_TES5_MODS_PATH"), target:name())
-    elseif os.getenv("XSE_TES5_GAME_PATH") then
-        copy(os.getenv("XSE_TES5_GAME_PATH"), "Data")
-    end
-end)

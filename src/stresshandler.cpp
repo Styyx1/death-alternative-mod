@@ -1,82 +1,68 @@
 #include "stresshandler.h"
 #include "settings.h"
+#include "mod-data.h"
 
-StressHandler::StressApplication *StressHandler::StressApplication::GetSingleton()
-{
-	static StressApplication singleton{};
-	return &singleton;
-}
+namespace Stress {
 
-void StressHandler::StressApplication::IncreaseStress(float a_amount)
-{
-	Settings::stress_total_value->value += a_amount;
-	CapStress(true);
-}
+using namespace MOD;
 
-void StressHandler::StressApplication::DecreaseStress(float a_amount)
-{
-	Settings::stress_total_value->value -= a_amount;
-	CapStress(false);
-}
-
-void StressHandler::StressApplication::ApplyStressOnce()
-{
-	if (Settings::stress_enabled)
+	void StressOnDeath::IncreaseStressLevel(float amount)
 	{
-		IncreaseStress(Settings::stress_increase_value);
-		ShowStressMessage(Settings::stress_increase_text);
-		stress_applied = true;
-	}
-	return;
-}
+		using namespace Config;
 
-void StressHandler::StressApplication::ReduceStress()
-{
-	if (Settings::stress_enabled)
+		if (!CanApplyStress())
+			return;
+
+		const float before = Forms::stress_total_value->value;
+		Forms::stress_total_value->value += amount;
+		CapStressLevel();
+		if (Forms::stress_total_value->value != before) {
+			stress_message_increase = Config::Settings::stress_increase_message.GetValue();
+			ProcessStressMessage(stress_message_increase.c_str());
+		}
+	} 
+	void StressOnDeath::DecreaseStressLevel(float amount)
 	{
-		DecreaseStress(Settings::stress_increase_value);
-		ShowStressMessage(Settings::stress_decrease_text);
-		stress_applied = false;
-	}
-}
+		using namespace Config;
 
-void StressHandler::StressApplication::ShowStressMessage(std::string a_text)
-{
-	RE::DebugNotification(a_text.c_str(), nullptr, true);
-}
-
-void StressHandler::StressApplication::CapStress(bool a_upper)
-{
-	if (a_upper)
-	{
-		if (Settings::stress_total_value->value > 100)
-		{
-			Settings::stress_total_value->value = 100.0f;
+		if (!CanApplyStress())
+			return;
+		const float before = Forms::stress_total_value->value;
+		Forms::stress_total_value->value -= amount;
+		CapStressLevel();
+		if (Forms::stress_total_value->value != before) {
+			stress_message_decrease = Config::Settings::stress_decrease_message.GetValue();
+			ProcessStressMessage(stress_message_decrease.c_str());
 		}
 	}
-	else
+	bool StressOnDeath::CanApplyStress() const
 	{
-		if (Settings::stress_total_value->value < 1.0)
-		{
-			Settings::stress_total_value->value = 0.0f;
+		using namespace Config;
+
+		if (!Forms::stress_enabled || !Forms::stress_total_value) {
+			return false;
+		}
+		if (Forms::stress_enabled->value <= 0.0f) {
+			return false;
+		}		
+		return true;
+	}
+	void StressOnDeath::CapStressLevel() const
+	{
+		using namespace Config;
+
+		if (Forms::stress_total_value->value >= MAX_STRESS) {
+			Forms::stress_total_value->value = MAX_STRESS;
+			return;
+		}
+		if (Forms::stress_total_value->value < MIN_STRESS) {
+			Forms::stress_total_value->value = MIN_STRESS;
+			return;
 		}
 	}
-}
-
-void StressHandler::StressApplication::IncreaseStressWithoutInjury(float a_amount)
-{
-	if (Settings::stress_enabled)
+	void StressOnDeath::ProcessStressMessage(const char* a_message)
 	{
-		Settings::stress_total_value->value += a_amount;
-		if (Settings::stress_total_value->value > 100)
-		{
-			Settings::stress_total_value->value = 100.0f;
-		}
-
-		if (Settings::stress_total_value->value < 1.0)
-		{
-			Settings::stress_total_value->value = 0.0f;
-		}
+		if(Config::Settings::show_stress_notif.GetValue())
+			RE::SendHUDMessage::ShowHUDMessage(a_message);
 	}
-	return;
 }

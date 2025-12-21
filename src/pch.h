@@ -4,8 +4,6 @@
 
 #include <RE/Skyrim.h>
 #include <SKSE/SKSE.h>
-#include <REX/REX/INI.h>
-#include "SimpleIni.h"
+#include <styyx-utils.h>
 
-namespace logs = SKSE::log;
-using namespace std::literals;
+using namespace StyyxUtil;

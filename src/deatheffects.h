@@ -1,26 +1,36 @@
 #pragma once
+#include "settings.h"
 
-namespace DeathEffects
-{
-	class Ethereal
-	{
-	public:
-		static void SetEthereal(RE::Actor* a_actor);
-		static void ProcessNPCDeath(RE::Actor* a_actor);
-		static void RemoveGoldPlayer(RE::PlayerCharacter* player, float a_percentage);
+namespace OnDeath {
+	struct Effects : REX::Singleton<Effects> {
+		void PlayerDeathEffects(RE::PlayerCharacter* player);
+		void NPCDeathEffects(RE::Actor* a_actor);
+	private:
+		void RemovePlayerGold(RE::PlayerCharacter* player, float a_percentage);
+		void HealOnDeath(RE::Actor* a_actor, float percentage = 100.0f);
+		void ApplyEtherealEffect(RE::Actor* a_actor);
+		void HealAndCalmEnemiesOnDeath(RE::Actor* a_actor, float a_area);
+		void RemoveDeathTokenNPC(RE::Actor* a_actor);
+		void ResurrectEnemiesOnDeath(RE::TESObjectCELL* a_cell) const;
+		void StaggerOnDeath(RE::Actor* a_actor);
 
-		// Credits: https://github.com/fenix31415/UselessFenixUtils
-		static uint32_t get_count_(RE::InventoryChanges* changes, RE::TESBoundObject* item)
-		{
-			using func_t = decltype(&get_count_);
-			REL::Relocation<func_t> func{ REL::RelocationID(15868, 16108) };
-			return func(changes, item);
-		}
+	};
+	struct Injuries : REX::Singleton<Injuries> {
+		void ProcessInjury(RE::Actor* a_actor);		
+		void RemoveAllInjuries(RE::Actor* a_actor);
+		void RemoveInjury(RE::Actor* a_actor,  RE::ActorValue a_av);
+		
 
-		static uint32_t get_count(RE::TESObjectREFR* refr, RE::TESBoundObject* item)
-		{
-			auto changes = refr->GetInventoryChanges();
-			return get_count_(changes, item);
-		}
+	private:
+		bool CheckLadyStoneGoldAmount(RE::PlayerCharacter* player);
+		void ApplyInjury(RE::Actor* a_actor, Config::Forms::InjuryType type);
+		void ApplyHealthInjury(RE::Actor* a_actor );
+		void ApplyStaminaInjury(RE::Actor* a_actor);
+		void ApplyMagickaInjury(RE::Actor* a_actor);
+		std::vector<Config::Forms::InjuryType> GetPossibleInjuries(RE::Actor* a_actor) const;
+		std::optional<Config::Forms::InjuryType> SelectInjury(RE::Actor* a_actor) const;
+		void ApplyStressOnDeath();
+		void RemoveDeathStress();
+
 	};
 }

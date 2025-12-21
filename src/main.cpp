@@ -2,19 +2,16 @@
 #include "ResurrectionAPI.h"
 #include "settings.h"
 #include "deatheffects.h"
-#include "injurybase.h"
-#include "serialisation.h"
-#include "hooks.h"
 #include "effectEvent.h"
-#include "stresshandler.h"
 #include "cache.h"
+#include "ui.h"
 
 #undef GetObject
 
 bool resurrect_only_with_gold(RE::PlayerCharacter *player)
 {
     RE::TESForm *const gold = RE::BGSDefaultObjectManager::GetSingleton()->GetObject(RE::DEFAULT_OBJECT::kGold);
-    if (Settings::kill_without_gold)
+    if (Config::Settings::toggle_death_without_gold.GetValue())
     {
         if (player->GetItemCount(gold->As<RE::TESBoundObject>()) > 0)
         {
@@ -29,15 +26,15 @@ bool resurrect_only_with_gold(RE::PlayerCharacter *player)
 }
 
 bool get_res_cond(RE::PlayerCharacter *player)
-{
-
+{    
+    bool has_injury_left = Config::Forms::injury_counter_global->value < Config::Settings::max_injury_count.GetValue();
     bool should_res = true;
-    auto injManager = Injuries::DeathInjury::GetSingleton();
-    if (Settings::number_of_injuries > 0)
+   
+    if (Config::Settings::max_injury_count > 0)
     {
-        if (injManager->injuryCount > Settings::number_of_injuries)
+        if (!has_injury_left)
         {
-            should_res = false;
+            return false;
         }
     }
     return should_res && resurrect_only_with_gold(player);
@@ -55,25 +52,22 @@ class ResurrectionManager : public ResurrectionAPI
         }
         else
         {
-            return false;
+            return ActorUtil::ActorHasItem(a, Config::Forms::cheat_death_token);
         }
     }
-
-    bool busy = false;
-    int counter = 0;
-    int debugCounter = 0;
 
     void resurrect(RE::Actor *a) override
     {
         RE::PlayerCharacter *player = RE::PlayerCharacter::GetSingleton();
+        const auto death = OnDeath::Effects::GetSingleton();
+
         if (a == player)
-        {
-            DeathEffects::Ethereal::SetEthereal(player);
+        {          
+            death->PlayerDeathEffects(player);
         }
         else
         {
-            DeathEffects::Ethereal::ProcessNPCDeath(a);
-            return;
+            death->NPCDeathEffects(a);
         }
         return;
     }
@@ -94,34 +88,29 @@ void InitListener(SKSE::MessagingInterface::Message *a_msg)
 {
     if (a_msg->type == SKSE::MessagingInterface::kDataLoaded)
     {
-        Settings::LoadSettings();
-        Settings::LoadForms();
-        Hooks::InstallHooks();
+        Config::Forms::GetSingleton()->LoadForms();
         Effect::InstallEvents();
-        SleepEvent::InstallEvents();
-
+        SleepEv::InstallSleep();
         addSubscriber();
-    }
-    if (a_msg->type == SKSE::MessagingInterface::kPostLoadGame)
-    {
-        auto injManager = Injuries::DeathInjury::GetSingleton();
-        injManager->CheckInjuryAvPenalty(RE::PlayerCharacter::GetSingleton());
+
+#ifdef _BUILD_DEFAULT_CONFIG
+        Config::Settings::min_sleep_duration.SetValue(8.1);
+        Config::Settings::GetSingleton()->UpdateSettings(true);
+        REX::INFO("Saved Default Config");
+#endif
+
+        
+
     }
 }
 
 SKSEPluginLoad(const SKSE::LoadInterface *a_skse)
 {
-    SKSE::Init(a_skse);
+    SKSE::Init(a_skse, {.trampoline = true});
     Cache::CacheAddLibAddresses();
-    SKSE::GetMessagingInterface()->RegisterListener(InitListener);
-    SKSE::AllocTrampoline(14 * 3);
-    if (auto serialization = SKSE::GetSerializationInterface())
-    {
-        serialization->SetUniqueID(Serialisation::ID);
-        serialization->SetSaveCallback(&Serialisation::SaveCallback);
-        serialization->SetLoadCallback(&Serialisation::LoadCallback);
-        serialization->SetRevertCallback(&Serialisation::RevertCallback);
-    }
+    Config::Settings::GetSingleton()->UpdateSettings(false);
+    SKSE::GetMessagingInterface()->RegisterListener(InitListener);    
+    Menu::RegisterShadesMenu();
 
     return true;
 }

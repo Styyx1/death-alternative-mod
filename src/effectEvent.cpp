@@ -1,45 +1,44 @@
 #include "effectEvent.h"
-#include "injurybase.h"
+#include "deatheffects.h"
 
-Effect::ApplyEffectEvent* Effect::ApplyEffectEvent::GetSingleton()
-{
-	static ApplyEffectEvent singleton{};
-	return std::addressof(singleton);
-}
-
-RE::BSEventNotifyControl Effect::ApplyEffectEvent::ProcessEvent(const RE::TESMagicEffectApplyEvent* a_event, RE::BSTEventSource<RE::TESMagicEffectApplyEvent>* a_eventSource) noexcept
-{
-	if (!a_event) {
-		return RE::BSEventNotifyControl::kContinue;
+namespace Effect {
+	void InstallEvents()
+	{
+		EffectApplyEvent::GetSingleton()->RegisterEffect();
 	}
-	RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
 
-	auto effect = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
-	if(!effect)	{
-		return RE::BSEventNotifyControl::kContinue;
+	void EffectApplyEvent::RegisterEffect()
+	{
+		if (const auto eventsrc = RE::ScriptEventSourceHolder::GetSingleton(); eventsrc) {
+			eventsrc->AddEventSink<RE::TESMagicEffectApplyEvent>(this);
+			REX::INFO("Registered for {}", typeid(RE::TESMagicEffectApplyEvent).name());
+		}
 	}
-	if (!effect->HasKeywordString("CureInjury")) {
-		return RE::BSEventNotifyControl::kContinue;
+
+	RES EffectApplyEvent::ProcessEvent(const RE::TESMagicEffectApplyEvent* a_event, RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*)
+	{
+		if (!a_event) {
+			return RES::kContinue;
+		}
+		auto effect = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
+		if (!effect) {
+			return RES::kContinue;
+		}
+		if (!effect->HasKeywordString("CureInjury")) {
+			return RES::kContinue;
+		}
+		auto targ = a_event->target.get();
+		if (!targ) {
+			return RES::kContinue;
+		}
+		auto actor = targ->As<RE::Actor>();
+		if (!actor) {
+			return RES::kContinue;
+		}
+		const auto injury_manager = OnDeath::Injuries::GetSingleton();
+		injury_manager->RemoveAllInjuries(actor);
+
+		return RES::kContinue;
 	}
-	auto injManager = Injuries::DeathInjury::GetSingleton();
-	injManager->RemoveAttributePenalty(player);
-	injManager->RemoveAllExistingInjurySpells(player);
-	injManager->HealStressFromDeath();
-
-	return RE::BSEventNotifyControl::kContinue;
 }
 
-void Effect::ApplyEffectEvent::RegisterApplyEffect()
-{
-	auto* eventSink = ApplyEffectEvent::GetSingleton();
-
-	auto* eventSourceHolder = RE::ScriptEventSourceHolder::GetSingleton();
-	eventSourceHolder->AddEventSink<RE::TESMagicEffectApplyEvent>(eventSink);
-
-	logs::info("registered Apply Effect Event");
-}
-
-void Effect::InstallEvents()
-{
-	ApplyEffectEvent::RegisterApplyEffect();
-}

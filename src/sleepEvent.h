@@ -1,43 +1,31 @@
 #pragma once
-#include "settings.h"
 
 // Credits: https://github.com/colinswrath/Survival-Mode-Improved-SKSE
-namespace SleepEvent
-{
-    static inline float hours;
-    void InstallEvents();
-    void ProcessSleepStart();
-    void ProcessSleepStop();
 
-    class SleepStartHandler final : public RE::BSTEventSink<RE::TESSleepStartEvent>
-    {
-        SleepStartHandler() = default;
-        SleepStartHandler(const SleepStartHandler &) = delete;
-        SleepStartHandler(SleepStartHandler &&) = delete;
-        SleepStartHandler &operator=(const SleepStartHandler &) = delete;
-        SleepStartHandler &operator=(SleepStartHandler &&) = delete;
+/// <summary>
+/// These Events are only used to cure death injuries after x hours of sleep
+/// SleepStart event is basically undefined in Clib, but it exists and i only need to check when it happens and don't need anything from the event 
+/// </summary>
+namespace SleepEv {
 
-    public:
-        static SleepStartHandler *GetSingleton();
+    using RES = RE::BSEventNotifyControl;
 
-        RE::BSEventNotifyControl ProcessEvent(const RE::TESSleepStartEvent *a_event, RE::BSTEventSource<RE::TESSleepStartEvent> *a_eventSource) noexcept override;
-        static void RegisterSleepStart();
+    inline float sleep_hours;
+    inline bool is_sleeping;
+
+    void InstallSleep();
+    
+    struct SleepStartEvent final : REX::Singleton<SleepStartEvent>, RE::BSTEventSink<RE::TESSleepStartEvent> {
+        void Install();
+    private:
+        void ProcessSleepStart();
+        RES ProcessEvent(const RE::TESSleepStartEvent* a_event, RE::BSTEventSource<RE::TESSleepStartEvent>*) override;
+    };
+    struct SleepStopEvent final : REX::Singleton<SleepStopEvent>, RE::BSTEventSink<RE::TESSleepStopEvent> {
+        void Install();
+    private:
+        void ProcessSleepStop();
+        RES ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>*) override;
     };
 
-    class SleepStopHandler final : public RE::BSTEventSink<RE::TESSleepStopEvent>
-    {
-        SleepStopHandler() = default;
-        SleepStopHandler(const SleepStopHandler &) = delete;
-        SleepStopHandler(SleepStopHandler &&) = delete;
-        SleepStopHandler &operator=(const SleepStopHandler &) = delete;
-        SleepStopHandler &operator=(SleepStopHandler &&) = delete;
-
-    public:
-        static SleepStopHandler *GetSingleton();
-
-        inline static bool is_sleeping;
-
-        RE::BSEventNotifyControl ProcessEvent(const RE::TESSleepStopEvent *a_event, RE::BSTEventSource<RE::TESSleepStopEvent> *a_eventSource) noexcept override;
-        static void RegisterSleepStop();
-    };
-} // namespace Events
+}

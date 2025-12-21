@@ -1,27 +1,18 @@
 #pragma once
-#include "settings.h"
 
-namespace StressHandler
-{
-	class StressApplication
-	{
-		StressApplication() = default;
-		StressApplication(const StressApplication&) = delete;
-		StressApplication(StressApplication&&) = delete;
-		StressApplication& operator=(const StressApplication&) = delete;
-		StressApplication& operator=(StressApplication&&) = delete;
+namespace Stress {
+	
 
-	public:
-		static StressApplication* GetSingleton();
+	struct StressOnDeath final : REX::Singleton<StressOnDeath>{
 
-		bool stress_applied;
-
-		void IncreaseStress(float a_amount);
-		void DecreaseStress(float a_amount);
-		void ApplyStressOnce();
-		void ReduceStress();
-		void ShowStressMessage(std::string a_text);
-		void CapStress(bool a_upper);
-		static void IncreaseStressWithoutInjury(float a_amount);
+		void IncreaseStressLevel(float amount);
+		void DecreaseStressLevel(float amount);
+	private:
+		bool CanApplyStress() const;
+		void CapStressLevel() const;		
+		void ProcessStressMessage(const char* a_message);
+		std::string stress_message_increase{};
+		std::string stress_message_decrease{};
 	};
 }
+
