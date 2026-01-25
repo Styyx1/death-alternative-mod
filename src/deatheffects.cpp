@@ -172,6 +172,10 @@ namespace OnDeath {
 				if (actor->HasKeywordString("NotResurrect") || actor->GetActorBase()->HasKeywordString("NotResurrect")) {
 					continue;
 				}
+				if (actor->GetActorBase()->IsSummonable()) {
+					continue;
+				}
+
 				bool is_boss = false;
 				auto loc = a_cell->GetLocation();
 				if (loc && !loc->promotedRefs.empty()) {
@@ -198,11 +202,10 @@ namespace OnDeath {
 	{
 		if (Config::Settings::toggle_death_stagger.GetValue()) {
 			a_actor->SetGraphVariableFloat("StaggerMagnitude", 1.0);
-			a_actor->NotifyAnimationGraph("StaggerStart");
-		
-		}
-			
+			a_actor->NotifyAnimationGraph("StaggerStart");		
+		}			
 	}
+
 	/// <summary>
 	/// Adds Injury Spell based on the InjuryType
 	/// if the actor is the player, it increases the injury count
@@ -226,7 +229,6 @@ namespace OnDeath {
 		if (a_actor->IsPlayerRef()) {
 			Config::Forms::injury_counter_global->value = MathUtil::AddWithCap<float>(Config::Forms::injury_counter_global->value, 1.0f, 100.0f);
 		}
-
 	}
 
 	/// <summary>

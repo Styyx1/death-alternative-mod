@@ -52,7 +52,7 @@ class ResurrectionManager : public ResurrectionAPI
         }
         else
         {
-            return ActorUtil::ActorHasItem(a, Config::Forms::cheat_death_token);
+            return ActorUtil::ActorHasItem(a, Config::Forms::cheat_death_token) || ActorUtil::HasEffectWithKeywordActive(a, "DoResurrect");
         }
     }
 
@@ -97,10 +97,7 @@ void InitListener(SKSE::MessagingInterface::Message *a_msg)
         Config::Settings::min_sleep_duration.SetValue(8.1);
         Config::Settings::GetSingleton()->UpdateSettings(true);
         REX::INFO("Saved Default Config");
-#endif
-
-        
-
+#endif 
     }
 }
 

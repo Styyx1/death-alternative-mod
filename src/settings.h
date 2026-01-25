@@ -40,6 +40,8 @@ namespace Config {
 
 		inline static REX::TOML::Bool toggle_death_stagger{ SETTINGS, "bToggleDeathStagger", false };
 
+		
+
 		void UpdateSettings(bool a_save) {
 			const auto toml = REX::TOML::SettingStore::GetSingleton();
 			toml->Init(TOML_DEF.data(), TOML_CUS.data());

@@ -7,7 +7,7 @@ includes("extern/styyx-utils")
 
 -- set project
 set_project("shades-of-mortality")
-set_version("2.0.0")
+set_version("3.0.0")
 set_license("GPL-3.0")
 
 -- set defaults

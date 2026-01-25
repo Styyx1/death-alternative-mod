@@ -2,6 +2,7 @@
 
 namespace MOD {
 	inline constexpr std::string_view THIS_MOD_NAME = "Shades of Mortality";
+	inline constexpr std::string_view RES_KEYWORD = "DoResurrect";
 
 	inline constexpr std::string_view TOML_DEF = "Data/SKSE/Plugins/shades.toml";
 	inline constexpr std::string_view TOML_CUS = "Data/SKSE/Plugins/shades_custom.toml";
@@ -39,9 +40,4 @@ namespace MOD {
 	inline constexpr float MAX_STRESS = 100.0f;
 	inline constexpr float MIN_STRESS = 0.0f;
 	inline constexpr int32_t MIN_GOLD_AMOUNT_REMOVED = 50;
-
-	// REMOVED
-	//inline constexpr RE::FormID INJURY_SPELL_ID = 0x807;
-	//inline constexpr RE::FormID INJURY_DISPLAY_EFFECT_ID = 0x804;
-
 };
